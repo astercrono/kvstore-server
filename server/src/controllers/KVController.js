@@ -15,7 +15,7 @@ router.get("/all",  (request, response) => {
 
 router.get("/value/:key",  (request, response) => {
 	if (!("key" in request.params)) {
-		failParam(response);
+		ControllerUtil.failParam(response);
 		return;
 	}
 
@@ -23,7 +23,7 @@ router.get("/value/:key",  (request, response) => {
 
 	kvservice.getValue(key, (err, keys) => {
 		if (err) {
-			failInternalError(response);
+			ControllerUtil.failInternalError(response);
 			return;
 		}
 		ControllerUtil.send(response, keys);
@@ -33,7 +33,7 @@ router.get("/value/:key",  (request, response) => {
 router.get("/keys",  (request, response) => {
 	kvservice.getKeys((err, keys) => {
 		if (err) {
-			failInternalError(response);
+			ControllerUtil.failInternalError(response);
 			return;
 		}
 		ControllerUtil.send(response, keys);
@@ -44,7 +44,7 @@ router.put("/value", jsonParser, (request, response) => {
 	const model = request.body;
 
 	if (!("key" in model) || !("value" in model)) {
-		failParam(response);
+		ControllerUtil.failParam(response);
 	}
 
 	const key = model.key;
@@ -52,17 +52,17 @@ router.put("/value", jsonParser, (request, response) => {
 
 	kvservice.putValue(key, value, (err) => {
 		if (err) {
-			failInternalError(response);
+			ControllerUtil.failInternalError(response);
 			return;
 		}
-		ControllerUtil.send(response, undefined);
+		ControllerUtil.send(response);
 	});
 });
 
 
 router.get("/keysWithValue/:value",  (request, response) => {
 	if (!("value" in request.params)) {
-		failParam(respose);
+		ControllerUtil.failParam(respose);
 		return;
 	}
 
@@ -70,15 +70,31 @@ router.get("/keysWithValue/:value",  (request, response) => {
 
 	kvservice.getKeysWithValue(value, (err, keys) => {
 		if (err) {
-			failInternalError(response);
+			ControllerUtil.failInternalError(response);
 			return;
 		}
 		ControllerUtil.send(response, keys);
 	});
 });
 
+router.delete("/value/:key", (request, response) => {
+	if (!("key" in request.params)) {
+		ControllerUtil.failParam(response);
+	}
+
+	const key = request.params.key;
+
+	kvservice.deleteValue(key, (err) => {
+		if (err) {
+			ControllerUtil.failInternalError(response);
+			return;
+		}
+		ControllerUtil.send(response);
+	});
+});
+
 router.all("*", (request, response) => {
-	failUnknownRoute(response);
+	ControllerUtil.failUnknownRoute(response);
 });
 
 module.exports = exports = router;

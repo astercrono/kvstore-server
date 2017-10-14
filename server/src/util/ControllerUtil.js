@@ -1,4 +1,8 @@
 module.exports = exports = {
+	send: (response) => {
+		response.json(undefined);
+	},
+
 	send: (response, data) => {
 		response.json(data);
 	},

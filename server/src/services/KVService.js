@@ -19,5 +19,9 @@ module.exports = exports = {
 
 	getKeysWithValue: (value, callback) => {
 		kvdao.getKeysWithValue(value, callback);
+	},
+
+	deleteValue: (key, callback) => {
+		kvdao.deleteValue(key, callback);
 	}
 };

@@ -8,12 +8,14 @@ const getValueSql = "select value from kvstore where key = ?";
 const putValueSql = "insert or replace into kvstore (key, value) values (?, ?)";
 const getKeysSql = "select key from kvstore";
 const getKeysWithValueSql = "select key from kvstore where value = ?";
+const deleteValueSql = "delete from kvstore where key = ?";
 
 module.exports = exports = {
 	getAll: (callback) => {
 		db.all(getAllSql, (err, rows) => {
 			if (err) {
 				callback(err);
+				return;
 			}
 
 			callback(undefined, rows);
@@ -24,6 +26,7 @@ module.exports = exports = {
 		db.get(getValueSql, [key], (err, row) => {
 			if (err) {
 				callback(err);
+				return;
 			}
 
 			callback(undefined, row);
@@ -34,6 +37,7 @@ module.exports = exports = {
 		db.run(putValueSql, [key, value], (err) => {
 			if (err) {
 				callback(err);
+				return;
 			}
 
 			callback();
@@ -44,6 +48,7 @@ module.exports = exports = {
 		db.all(getKeysSql, (err, rows) => {
 			if (err) {
 				callback(err);
+				return;
 			}
 
 			var keys = [];
@@ -64,6 +69,7 @@ module.exports = exports = {
 		db.all(getKeysWithValueSql, [value], (err, rows) => {
 			if (err) {
 				callback(err);
+				return;
 			}
 
 			var keys = [];
@@ -77,6 +83,17 @@ module.exports = exports = {
 			}
 
 			callback(undefined, keys);
+		});
+	},
+
+	deleteValue: (key, callback) => {
+		db.run(deleteValueSql, [key], (err) => {
+			if (err) {
+				callback(err);
+				return;
+			}
+
+			callback();
 		});
 	}
 };
