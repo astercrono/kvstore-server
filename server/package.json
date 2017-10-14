@@ -1,0 +1,23 @@
+{
+	"name": "kvstore-server",
+	"version": "0.0.1",
+	"description": "A key-value store with a RESTful API.",
+	"contributors": [
+		{
+			"name": "Travis Kern",
+			"email": "kern.travis@gmail.com"
+		}
+	],
+	"main": "./app.js",
+	"license": "MIT",
+	"dependencies": {
+		"body-parser": "1.18.2",
+		"eslint": "^4.8.0",
+		"express": "4.16.1",
+		"gulp-eslint": "^4.0.0",
+		"sqlite3": "3.1.13"
+	},
+	"devDependencies": {
+		"gulp": "3.9.1"
+	}
+}
