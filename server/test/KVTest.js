@@ -1,17 +1,24 @@
-module.exports = exports = (test) => {
+module.exports = exports = (test, startServer) => {
 	const config = require("../config");
 	config.database.path = ":memory:";
 
 	const kvservice = require("../src/services/KVService");
 	const async = require("async");
+	let server;
+
+	if (startServer) {
+		server = require("../app");
+	}
 
 	const context = {
+		config: config,
 		service: kvservice,
+		server: server,
 
 		mockData: (done) => {
 			async.series([
 				(callback) => {
-					kvservice.createDatabase((err) => {
+					kvservice.refreshDatabase((err) => {
 						callback(err);
 					});
 				},
@@ -47,6 +54,12 @@ module.exports = exports = (test) => {
 				}
 				done();
 			});
+		},
+
+		destroy: () => {
+			if (server) {
+				server.close();
+			}
 		}
 	};
 	

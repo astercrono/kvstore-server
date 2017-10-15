@@ -102,14 +102,26 @@ module.exports = exports = {
 		});
 	},
 
-	createDatabase: (callback) => {
-		let kvstoreTableSql = " " +
-			"create table kvstore ( " +
+	createKVStore: (callback) => {
+		const sql = " " +
+			"create table if not exists kvstore ( " +
 			"    key text not null primary key, " +
 			"    value text " +
 			") without rowid ";
 
-		db.run(kvstoreTableSql, [], (err) => {
+		db.run(sql, [], (err) => {
+			if (err) {
+				callback(err);
+				return;
+			}
+			callback();
+		});
+	},
+
+	dropKVStore: (callback) => {
+		const sql = "drop table if exists kvstore";
+
+		db.run(sql, [], (err) => {
 			if (err) {
 				callback(err);
 				return;

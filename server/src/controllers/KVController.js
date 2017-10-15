@@ -77,12 +77,14 @@ router.get("/keysWithValue/:value",  (request, response) => {
 	});
 });
 
-router.delete("/value/:key", (request, response) => {
-	if (!("key" in request.params)) {
+router.delete("/value", jsonParser, (request, response) => {
+	const model = request.body;
+
+	if (!("key" in model)) {
 		ControllerUtil.failParam(response);
 	}
 
-	const key = request.params.key;
+	const key = model.key;
 
 	kvservice.deleteValue(key, (err) => {
 		if (err) {

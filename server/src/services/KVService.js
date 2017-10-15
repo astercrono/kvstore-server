@@ -25,7 +25,14 @@ module.exports = exports = {
 		kvdao.deleteValue(key, callback);
 	},
 
-	createDatabase: (callback) => {
-		kvdao.createDatabase(callback);
+	refreshDatabase: (callback) => {
+		kvdao.dropKVStore((err) => {
+			if (err) {
+				callback(err);
+				return;
+			}
+
+			kvdao.createKVStore(callback);
+		});
 	}
 };

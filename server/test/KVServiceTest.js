@@ -117,6 +117,11 @@ function testKVService(context, assert) {
 			});
 
 		});
+
+		after((done) => {
+			context.destroy();
+			done();
+		});
 	});
 };
 
@@ -125,4 +130,4 @@ run((context, assert) => {
 	assert.ok(!assert != null);
 
 	testKVService(context, assert);
-});
+}, false);
