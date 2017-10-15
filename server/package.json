@@ -11,13 +11,18 @@
 	"main": "./app.js",
 	"license": "MIT",
 	"dependencies": {
+		"async": "^2.5.0",
 		"body-parser": "1.18.2",
-		"eslint": "^4.8.0",
 		"express": "4.16.1",
-		"gulp-eslint": "^4.0.0",
 		"sqlite3": "3.1.13"
 	},
 	"devDependencies": {
-		"gulp": "3.9.1"
+		"gulp": "3.9.1",
+		"mocha": "4.0.1",
+		"eslint": "4.8.0",
+		"gulp-eslint": "4.0.0"
+	},
+	"scripts": {
+		"test": "mocha"
 	}
 }

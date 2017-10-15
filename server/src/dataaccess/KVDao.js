@@ -29,7 +29,12 @@ module.exports = exports = {
 				return;
 			}
 
-			callback(undefined, row);
+			if (row) {
+				callback(undefined, row.value);
+				return;
+			}
+				
+			callback();
 		});
 	},
 
@@ -93,6 +98,22 @@ module.exports = exports = {
 				return;
 			}
 
+			callback();
+		});
+	},
+
+	createDatabase: (callback) => {
+		let kvstoreTableSql = " " +
+			"create table kvstore ( " +
+			"    key text not null primary key, " +
+			"    value text " +
+			") without rowid ";
+
+		db.run(kvstoreTableSql, [], (err) => {
+			if (err) {
+				callback(err);
+				return;
+			}
 			callback();
 		});
 	}

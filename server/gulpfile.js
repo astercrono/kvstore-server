@@ -8,5 +8,4 @@ gulp.task("lint", () => {
 		.pipe(eslint.failAfterError());
 });
 
-gulp.task("test", ["lint"]);
-gulp.task("default", ["test"]);
+gulp.task("default", ["lint"]);
