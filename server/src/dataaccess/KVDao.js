@@ -9,6 +9,12 @@ const putValueSql = "insert or replace into kvstore (key, value) values (?, ?)";
 const getKeysSql = "select key from kvstore";
 const getKeysWithValueSql = "select key from kvstore where value = ?";
 const deleteValueSql = "delete from kvstore where key = ?";
+const createKVStoreSql = " " +
+		"create table if not exists kvstore ( " +
+		"    key text not null primary key, " +
+		"    value text " +
+		") without rowid ";
+const dropKVStoreSql = "drop table if exists kvstore";
 
 module.exports = exports = {
 	getAll: (callback) => {
@@ -103,13 +109,7 @@ module.exports = exports = {
 	},
 
 	createKVStore: (callback) => {
-		const sql = " " +
-			"create table if not exists kvstore ( " +
-			"    key text not null primary key, " +
-			"    value text " +
-			") without rowid ";
-
-		db.run(sql, [], (err) => {
+		db.run(createKVStoreSql, [], (err) => {
 			if (err) {
 				callback(err);
 				return;
@@ -119,9 +119,7 @@ module.exports = exports = {
 	},
 
 	dropKVStore: (callback) => {
-		const sql = "drop table if exists kvstore";
-
-		db.run(sql, [], (err) => {
+		db.run(dropKVStoreSql, [], (err) => {
 			if (err) {
 				callback(err);
 				return;

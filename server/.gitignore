@@ -1,2 +1,4 @@
 node_modules
 kvstore.db
+.vscode/launch.json
+kvstore.secret
