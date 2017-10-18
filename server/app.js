@@ -11,8 +11,8 @@ const server = () => {
 	const server = app.listen(config.server.port);
 	console.log("KVStore server is running.");
 
-	KVCrypt.initSecret((err, secret) => {
-		console.log("Secret initialized");
+	KVCrypt.initKey(true, (err, key) => {
+		console.log("Key initialized");
 	});
 
 	return server;

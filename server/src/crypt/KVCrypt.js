@@ -1,114 +1,88 @@
 const config = require("../../config");
 const fs = require("fs");
 const crypto = require("crypto");
-const KVSecret = require("./KVSecret");
+
+const IV_KEY_DELIMETER = "$";
+const ALGORITHM = "aes-" + config.crypt.keyLength + "-" + config.crypt.blockMode;
 
 module.exports = exports = {
 	encrypt: (plaintext, callback) => {
-		readSecretFile((err, model) => {
+		readKeyFile((err, key) => {
 			if (err) {
 				callback(err);
 				return;
 			}
 
-			encryptText(plaintext, model, callback);
+			pbkdf2((err, iv) => {
+				const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+				cipher.update(plaintext, "base64");
+
+				const cipherText = cipher.final("base64");
+				const fullCipherText = addIVToKey(key, iv);
+
+				callback(undefined, fullCipherText);
+			});
 		});
 	},
 
-	decrypt: (ciphertext, callback) => {
-		readSecretFile((err, model) => {
+	decrypt: (cipherText, callback) => {
+		readKeyFile((err, key) => {
 			if (err) {
 				callback(err);
 				return;
 			}
 
-			decryptText(ciphertext, model, callback);
+			var secret = separateIVFromKey(key);			
+
+			const cipher = crypto.createDecipheriv(ALGORITHM, secret.key, secret.iv);
+			cipher.update(cipherText, "base64");
+		
+			const plaintext = cipher.final("base64");
+			return plaintext;
 		});
 	},
 
-	initSecret: (callback) => {
-		readSecretFile((err, model) => {
-			if (err || !model || !model.validate()) {
-				createSecret((err, secret) => {
+	initKey: (overwrite, callback) => {
+		readKeyFile((err, key) => {
+			if (err || !key || key === "" || key.length === 0) {
+				if (!overwrite) {
+					callback(undefined, key);
+					return;
+				}
+
+				createKey((err, newKey) => {
 					if (err) {
 						callback(err);
 						return;
 					}
 
-					const secretJson = JSON.stringify({
-						"key": secret.key,
-						"iv": secret.iv
-					});
-
-					fs.writeFile(config.crypt.path, secretJson, (err) => {
-						if (err) {
-							callback(err);
-							return;
-						}
-
-						callback(undefined, secret);
-					});
+					fs.writeFile(config.crypt.path, newKey, callback);
 				});
-
-				callback(err);
-				return;
 			}
-
-			callback(undefined, model);
 		});
 	}
 };
 
-function createSecret(callback) {
+function createKey(callback) {
 	pbkdf2((err, key) => {
 		if (err) {
 			callback(err);
 			return;
 		}
 
-		pbkdf2((err, iv) => {
-			if (err) {
-				callback(err);
-				return;
-			}
-
-			callback(undefined, KVSecret.create(key, iv));
-		});
+		callback(undefined, key);
 	});
 }
 
-function readSecretFile(callback) {
-	fs.readFile(config.crypt.path, "utf8", (err, data) => {
+function readKeyFile(callback) {
+	fs.readFile(config.crypt.path, "utf8", (err, key) => {
 		if (err) {
 			callback(err);
 			return;
 		}
 
-		const model = JSON.parse(data);
-		const secret = KVSecret.create(model.key, model.iv);
-
-		callback(undefined, secret);
+		callback(undefined, key);
 	});
-}
-
-function encryptText(plaintext, secret, callback) {
-	const keyLength = config.crypt.keyLength;
-	const blockMode = config.crypt.blockMode;
-
-	const cipher = crypto.createCipheriv("aes-" + keyLength + "-" + blockMode, secret.key, secret.iv);
-	cipher.update(plaintext, "base64");
-
-	return cipher.final("base64");
-}
-
-function decryptText(ciphertext, secret, callback) {
-	const keyLength = config.crypt.keyLength;
-	const blockMode = config.crypt.blockMode;
-
-	const cipher = crypto.createDecipheriv("aes-" + keyLength + "-" + blockMode, secret.key, secret.iv);
-	cipher.update(ciphertext, "base64");
-
-	return cipher.final("base64");
 }
 
 function generateRandomValue(length, callback) {
@@ -140,4 +114,19 @@ function pbkdf2(callback) {
 			});
 		});
 	});
+}
+
+function addIVToKey(key, iv) {
+	return iv + IV_KEY_DELIMETER + key;
+}
+
+function separateIVFromKey(fullKey) {
+	const index = fullKey.indexOf(IV_KEY_DELIMETER);
+	const iv = fullKey.substring(0, index);
+	const key = fullKey.substring(index + 1, fullKey.length);
+
+	return {
+		"iv": iv,
+		"key": key
+	};
 }
