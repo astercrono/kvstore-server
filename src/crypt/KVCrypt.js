@@ -17,8 +17,6 @@ module.exports = exports = {
 			}
 
 			pbkdf2(IV_LENGTH, (err, ivBuffer) => {
-				// const ivString = x.toString("hex").slice(0, 16);
-
 				const cipher = crypto.createCipheriv(ALGORITHM, keyBuffer, ivBuffer);
 				cipher.update(plaintext, "utf8");
 
