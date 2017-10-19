@@ -45,7 +45,7 @@ function testKVController(context, assert) {
 			});
 		});
 
-		it("PUT /keys", (done) => {
+		it("PUT /value", (done) => {
 			request({
 				url: url("/value"),
 				method: "PUT",
