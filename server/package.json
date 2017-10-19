@@ -22,8 +22,5 @@
 		"mocha": "4.0.1",
 		"eslint": "4.8.0",
 		"gulp-eslint": "4.0.0"
-	},
-	"scripts": {
-		"test": "mocha"
 	}
 }

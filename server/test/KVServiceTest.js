@@ -1,17 +1,19 @@
 const async = require("async");
-const run = require("./KVTest");
+const run = require("./KVMockDataTest");
+const KVService = require("../src/services/KVService");
 
 function testKVService(context, assert) {
 	describe("KVService", () => {
 		before((done) => {
-			context.mockData((err) => {
-				assert.ok(!err);
-				done();
+			context.startServer(() => {
+				context.mockData(() => {
+					done();
+				});
 			});
 		});
 
 		it("getAll()", (done) => {
-			context.service.getAll((err, rows) => {
+			KVService.getAll((err, rows) => {
 				assert.ok(!err);
 				assert.equal(rows.length, 5);
 				done();
@@ -19,7 +21,7 @@ function testKVService(context, assert) {
 		});
 
 		it("getValue()", (done) => {
-			context.service.getValue("key2", (err, value) => {
+			KVService.getValue("key2", (err, value) => {
 				assert.ok(!err);
 				assert.equal(value, "value2");
 				done();
@@ -32,13 +34,13 @@ function testKVService(context, assert) {
 
 			async.series([
 				(callback) => {
-					context.service.putValue(newKey, newValue, (err) => {
+					KVService.putValue(newKey, newValue, (err) => {
 						assert.ok(!err);
 						callback();
 					});
 				},
 				(callback) => {
-					context.service.getValue(newKey, (err, value) => {
+					KVService.getValue(newKey, (err, value) => {
 						assert.ok(!err);
 						assert.equal(value, newValue);
 						callback();
@@ -59,13 +61,13 @@ function testKVService(context, assert) {
 
 			async.series([
 				(callback) => {
-					context.service.putValue(existingKey, newValue, (err) => {
+					KVService.putValue(existingKey, newValue, (err) => {
 						assert.ok(!err);
 						callback();
 					});
 				},
 				(callback) => {
-					context.service.getValue(existingKey, (err, value) => {
+					KVService.getValue(existingKey, (err, value) => {
 						assert.ok(!err);
 						assert.notEqual(value, oldValue);
 						assert.equal(value, newValue);
@@ -79,7 +81,7 @@ function testKVService(context, assert) {
 		});
 
 		it("getKeys()", (done) => {
-			context.service.getKeys((err, keys) => {
+			KVService.getKeys((err, keys) => {
 				assert.ok(!err);
 				assert.equal(keys.length, 6);
 				done();
@@ -87,7 +89,7 @@ function testKVService(context, assert) {
 		});
 
 		it("getKeysWithValue()", (done) => {
-			context.service.getKeysWithValue("value1", (err, keys) => {
+			KVService.getKeysWithValue("value1", (err, keys) => {
 				assert.ok(!err);
 				assert.equal(keys.length, 2);
 				done();
@@ -99,13 +101,13 @@ function testKVService(context, assert) {
 
 			async.series([
 				(callback) => {
-					context.service.deleteValue(key, (err) => {
+					KVService.deleteValue(key, (err) => {
 						assert.ok(!err);
 						callback();
 					});
 				},
 				(callback) => {
-					context.service.getValue(key, (err, value) => {
+					KVService.getValue(key, (err, value) => {
 						assert.ok(!err);
 						assert.ok(!value);
 						callback();

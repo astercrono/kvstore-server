@@ -2,23 +2,29 @@ const config = require("../../config");
 const fs = require("fs");
 const crypto = require("crypto");
 
+
+const IV_LENGTH = config.crypt.ivLength;
+const KEY_LENGTH = config.crypt.keyLength;
 const IV_KEY_DELIMETER = "$";
-const ALGORITHM = "aes-" + config.crypt.keyLength + "-" + config.crypt.blockMode;
+const ALGORITHM = config.crypt.encryptAlgrorithm;
 
 module.exports = exports = {
 	encrypt: (plaintext, callback) => {
-		readKeyFile((err, key) => {
+		readKeyFile((err, keyBuffer) => {
 			if (err) {
 				callback(err);
 				return;
 			}
 
-			pbkdf2((err, iv) => {
-				const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
-				cipher.update(plaintext, "base64");
+			pbkdf2(IV_LENGTH, (err, ivBuffer) => {
+				// const ivString = x.toString("hex").slice(0, 16);
 
-				const cipherText = cipher.final("base64");
-				const fullCipherText = addIVToKey(key, iv);
+				const cipher = crypto.createCipheriv(ALGORITHM, keyBuffer, ivBuffer);
+				cipher.update(plaintext, "utf8");
+
+				const cipherText = cipher.final("hex");
+				const ivString = ivBuffer.toString("hex");
+				const fullCipherText = addIVToCipherText(cipherText, ivString);
 
 				callback(undefined, fullCipherText);
 			});
@@ -32,39 +38,48 @@ module.exports = exports = {
 				return;
 			}
 
-			var secret = separateIVFromKey(key);			
+			const secret = separateIVFromCipherText(cipherText);
+			const ivBuffer = Buffer.from(secret.iv, "hex");
+			const splitCipherText = secret.cipherText;
 
-			const cipher = crypto.createDecipheriv(ALGORITHM, secret.key, secret.iv);
-			cipher.update(cipherText, "base64");
+			const decipher = crypto.createDecipheriv(ALGORITHM, key, ivBuffer);
+			decipher.update(splitCipherText, "hex");
 		
-			const plaintext = cipher.final("base64");
-			return plaintext;
+			const plaintext = decipher.final("utf8");
+			callback(undefined, plaintext);
 		});
 	},
 
 	initKey: (overwrite, callback) => {
 		readKeyFile((err, key) => {
-			if (err || !key || key === "" || key.length === 0) {
-				if (!overwrite) {
-					callback(undefined, key);
-					return;
-				}
-
-				createKey((err, newKey) => {
+			if (err || overwrite) {
+				createKey((err, buffer) => {
 					if (err) {
 						callback(err);
 						return;
 					}
 
-					fs.writeFile(config.crypt.path, newKey, callback);
+					const newKey = buffer.toString("hex");
+
+					fs.writeFile(config.crypt.path, newKey, (err) => {
+						if (err) {
+							callback(err);
+							return;
+						}
+
+						callback(undefined, newKey);
+					});
 				});
+				return;
 			}
+
+			callback(undefined, key);
 		});
 	}
 };
 
 function createKey(callback) {
-	pbkdf2((err, key) => {
+	pbkdf2(KEY_LENGTH, (err, key) => {
 		if (err) {
 			callback(err);
 			return;
@@ -81,52 +96,52 @@ function readKeyFile(callback) {
 			return;
 		}
 
-		callback(undefined, key);
+		callback(undefined, Buffer.from(key, "hex"));
 	});
 }
 
-function generateRandomValue(length, callback) {
+function generateRandomHexString(length, callback) {
 	crypto.randomBytes(length, (err, buff) => {
 		if (err) {
 			callback(err);
 			return;
 		}
 
-		const value = buff.toString("base64");
+		const value = buff.toString("hex");
 		callback(undefined, value);
 	});
 }
 
-function pbkdf2(callback) {
-	generateRandomValue(config.crypt.saltLength, (err, salt) => {
-		generateRandomValue(config.crypt.passwordLength, (err, password) => {
-			const algorithm = "sha" + config.crypt.keyLength;
+function pbkdf2(length, callback) {
+	generateRandomHexString(config.crypt.saltLength, (err, salt) => {
+		generateRandomHexString(config.crypt.passwordLength, (err, password) => {
+			const algorithm = config.crypt.pbkdf2Algorithm;
 			const iterations = config.crypt.pbkdf2Iterations;
 			const keyLength = config.crypt.keyLength;
 
-			crypto.pbkdf2(password, salt, iterations, keyLength, algorithm, (err, cipher) => {
+			crypto.pbkdf2(password, salt, iterations, length, algorithm, (err, buffer) => {
 				if (err) {
 					callback(err);
 					return;
 				}
 
-				callback(undefined, cipher.toString("base64"));
+				callback(undefined, buffer);
 			});
 		});
 	});
 }
 
-function addIVToKey(key, iv) {
-	return iv + IV_KEY_DELIMETER + key;
+function addIVToCipherText(cipherText, iv) {
+	return iv + IV_KEY_DELIMETER + cipherText;
 }
 
-function separateIVFromKey(fullKey) {
-	const index = fullKey.indexOf(IV_KEY_DELIMETER);
-	const iv = fullKey.substring(0, index);
-	const key = fullKey.substring(index + 1, fullKey.length);
+function separateIVFromCipherText(fullCipherText) {
+	const index = fullCipherText.indexOf(IV_KEY_DELIMETER);
+	const iv = fullCipherText.substring(0, index);
+	const cipherText = fullCipherText.substring(index + 1, fullCipherText.length);
 
 	return {
 		"iv": iv,
-		"key": key
+		"cipherText": cipherText
 	};
 }

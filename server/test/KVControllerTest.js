@@ -1,17 +1,20 @@
+const config = require("../config");
+const run = require("./KVMockDataTest");
+
 const request = require("request");
-const run = require("./KVTest");
 
 function testKVController(context, assert) {
-	const baseUrl = "http://localhost:" + context.config.server.port;
+	const baseUrl = "http://localhost:" + config.server.port;
 	const url = (path) => {
 		return baseUrl + path;
 	};
 
 	describe("KVController", () => {
 		before((done) => {
-			context.mockData((err) => {
-				assert.ok(!err);
-				done();
+			context.startServer(() => {
+				context.mockData(() => {
+					done();
+				});
 			});
 		});
 

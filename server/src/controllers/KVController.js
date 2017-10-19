@@ -3,12 +3,12 @@ const router = express.Router();
 const bodyParser = require("body-parser");
 
 const ControllerUtil = require("../util/ControllerUtil");
-const kvservice = require("../services/KVService");
+const KVService = require("../services/KVService");
 
 const jsonParser = bodyParser.json();
 
 router.get("/all",  (request, response) => {
-	kvservice.getAll((err, rows) => {
+	KVService.getAll((err, rows) => {
 		ControllerUtil.send(response, rows);
 	});
 });
@@ -21,7 +21,7 @@ router.get("/value/:key",  (request, response) => {
 
 	const key = request.params.key;
 
-	kvservice.getValue(key, (err, keys) => {
+	KVService.getValue(key, (err, keys) => {
 		if (err) {
 			ControllerUtil.failInternalError(response);
 			return;
@@ -31,7 +31,7 @@ router.get("/value/:key",  (request, response) => {
 });
 
 router.get("/keys",  (request, response) => {
-	kvservice.getKeys((err, keys) => {
+	KVService.getKeys((err, keys) => {
 		if (err) {
 			ControllerUtil.failInternalError(response);
 			return;
@@ -50,7 +50,7 @@ router.put("/value", jsonParser, (request, response) => {
 	const key = model.key;
 	const value = model.value;
 
-	kvservice.putValue(key, value, (err) => {
+	KVService.putValue(key, value, (err) => {
 		if (err) {
 			ControllerUtil.failInternalError(response);
 			return;
@@ -68,7 +68,7 @@ router.get("/keysWithValue/:value",  (request, response) => {
 
 	const value = request.params.value;
 
-	kvservice.getKeysWithValue(value, (err, keys) => {
+	KVService.getKeysWithValue(value, (err, keys) => {
 		if (err) {
 			ControllerUtil.failInternalError(response);
 			return;
@@ -86,7 +86,7 @@ router.delete("/value", jsonParser, (request, response) => {
 
 	const key = model.key;
 
-	kvservice.deleteValue(key, (err) => {
+	KVService.deleteValue(key, (err) => {
 		if (err) {
 			ControllerUtil.failInternalError(response);
 			return;
