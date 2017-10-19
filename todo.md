@@ -1,0 +1,2 @@
+ - encrypt / decrypt keys and values for in service for dao calls
+ - authentication layer for routes
