@@ -59,24 +59,6 @@ router.put("/value", jsonParser, (request, response) => {
 	});
 });
 
-
-router.get("/keysWithValue/:value",  (request, response) => {
-	if (!("value" in request.params)) {
-		ControllerUtil.failParam(respose);
-		return;
-	}
-
-	const value = request.params.value;
-
-	KVService.getKeysWithValue(value, (err, keys) => {
-		if (err) {
-			ControllerUtil.failInternalError(response);
-			return;
-		}
-		ControllerUtil.send(response, keys);
-	});
-});
-
 router.delete("/value", jsonParser, (request, response) => {
 	const model = request.body;
 

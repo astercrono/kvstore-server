@@ -76,27 +76,6 @@ module.exports = exports = {
 		});
 	},
 
-	getKeysWithValue: (value, callback) => {
-		db.all(getKeysWithValueSql, [value], (err, rows) => {
-			if (err) {
-				callback(err);
-				return;
-			}
-
-			var keys = [];
-
-			rows.forEach((row) => {
-				keys.push(row.key);
-			});
-
-			if (keys.length === 0) {
-				keys = undefined;
-			}
-
-			callback(undefined, keys);
-		});
-	},
-
 	deleteValue: (key, callback) => {
 		db.run(deleteValueSql, [key], (err) => {
 			if (err) {

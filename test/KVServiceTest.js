@@ -88,14 +88,6 @@ function testKVService(context, assert) {
 			});
 		});
 
-		it("getKeysWithValue()", (done) => {
-			KVService.getKeysWithValue("value1", (err, keys) => {
-				assert.ok(!err);
-				assert.equal(keys.length, 2);
-				done();
-			});
-		});
-
 		it("deleteValue()", (done) => {
 			const key = "key6";
 

@@ -61,15 +61,6 @@ function testKVController(context, assert) {
 			});
 		});	
 
-		it("GET /keysWithValue/:value", (done) => {
-			request(url("/keysWithValue/value1"), function(err, response, body) {
-				assert.ok(!err);
-				assert.ok(body);
-				assert.equal(response.statusCode, 200);
-				done();
-			});
-		});
-
 		it("DELETE /value", (done) => {
 			request({
 				url: url("/value"),

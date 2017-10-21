@@ -1,4 +1,7 @@
 const config = require("../config");
+config.database.path = ":memory:";
+config.crypt.path = "kvstore-test.secret";
+
 const KVServer = require("../src/KVServer");
 const KVService = require("../src/services/KVService");
 
@@ -6,8 +9,7 @@ const async = require("async");
 const assert = require("assert");
 
 module.exports = exports = (test) => {
-	config.database.path = ":memory:";
-	config.crypt.path = "kvstore-test.secret";
+
 
 	let server = KVServer(true);
 
