@@ -2,22 +2,22 @@ const config = require("../../config");
 const fs = require("fs");
 const crypto = require("crypto");
 
-
-const IV_LENGTH = config.crypt.ivLength;
-const KEY_LENGTH = config.crypt.keyLength;
-const IV_KEY_DELIMETER = "$";
-const ALGORITHM = config.crypt.encryptAlgrorithm;
+const encryptionConfig = config.crypt.encryption;
+const signingConfig = config.crypt.signing;
 
 module.exports = exports = {
 	encrypt: (plaintext, callback) => {
+		const ivLength = encryptionConfig.ivLength;
+		const algorithm = encryptionConfig.algorithm;
+
 		readKeyFile((err, keyBuffer) => {
 			if (err) {
 				callback(err);
 				return;
 			}
 
-			pbkdf2(IV_LENGTH, (err, ivBuffer) => {
-				const cipher = crypto.createCipheriv(ALGORITHM, keyBuffer, ivBuffer);
+			pbkdf2(ivLength, (err, ivBuffer) => {
+				const cipher = crypto.createCipheriv(algorithm, keyBuffer, ivBuffer);
 				cipher.update(plaintext, "utf8");
 
 				const cipherText = cipher.final("hex");
@@ -30,6 +30,8 @@ module.exports = exports = {
 	},
 
 	decrypt: (cipherText, callback) => {
+		const algorithm = encryptionConfig.algorithm;
+
 		readKeyFile((err, key) => {
 			if (err) {
 				callback(err);
@@ -40,7 +42,7 @@ module.exports = exports = {
 			const ivBuffer = Buffer.from(secret.iv, "hex");
 			const splitCipherText = secret.cipherText;
 
-			const decipher = crypto.createDecipheriv(ALGORITHM, key, ivBuffer);
+			const decipher = crypto.createDecipheriv(algorithm, key, ivBuffer);
 			decipher.update(splitCipherText, "hex");
 		
 			const plaintext = decipher.final("utf8");
@@ -59,7 +61,7 @@ module.exports = exports = {
 
 					const newKey = buffer.toString("hex");
 
-					fs.writeFile(config.crypt.path, newKey, (err) => {
+					fs.writeFile(encryptionConfig.path, newKey, (err) => {
 						if (err) {
 							callback(err);
 							return;
@@ -77,7 +79,7 @@ module.exports = exports = {
 };
 
 function createKey(callback) {
-	pbkdf2(KEY_LENGTH, (err, key) => {
+	pbkdf2(encryptionConfig.keyLength, (err, key) => {
 		if (err) {
 			callback(err);
 			return;
@@ -88,7 +90,7 @@ function createKey(callback) {
 }
 
 function readKeyFile(callback) {
-	fs.readFile(config.crypt.path, "utf8", (err, key) => {
+	fs.readFile(encryptionConfig.path, "utf8", (err, key) => {
 		if (err) {
 			callback(err);
 			return;
@@ -111,12 +113,13 @@ function generateRandomHexString(length, callback) {
 }
 
 function pbkdf2(length, callback) {
-	generateRandomHexString(config.crypt.saltLength, (err, salt) => {
-		generateRandomHexString(config.crypt.passwordLength, (err, password) => {
-			const algorithm = config.crypt.pbkdf2Algorithm;
-			const iterations = config.crypt.pbkdf2Iterations;
-			const keyLength = config.crypt.keyLength;
+	const saltLength = encryptionConfig.saltLength;
+	const passwordLength = encryptionConfig.passwordLength;
+	const algorithm = encryptionConfig.pbkdf2Algorithm;
+	const iterations = encryptionConfig.pbkdf2Iterations;
 
+	generateRandomHexString(saltLength, (err, salt) => {
+		generateRandomHexString(passwordLength, (err, password) => {
 			crypto.pbkdf2(password, salt, iterations, length, algorithm, (err, buffer) => {
 				if (err) {
 					callback(err);
@@ -130,11 +133,11 @@ function pbkdf2(length, callback) {
 }
 
 function addIVToCipherText(cipherText, iv) {
-	return iv + IV_KEY_DELIMETER + cipherText;
+	return iv + encryptionConfig.keyDelimiter + cipherText;
 }
 
 function separateIVFromCipherText(fullCipherText) {
-	const index = fullCipherText.indexOf(IV_KEY_DELIMETER);
+	const index = fullCipherText.indexOf(encryptionConfig.keyDelimiter);
 	const iv = fullCipherText.substring(0, index);
 	const cipherText = fullCipherText.substring(index + 1, fullCipherText.length);
 
