@@ -12,7 +12,7 @@ module.exports = exports = {
 			}
 
 			if (!allRows|| allRows.length === 0) {
-				callback(undefined, rows);
+				callback(undefined, allRows);
 			}
 
 			const decryptOperations = [];
