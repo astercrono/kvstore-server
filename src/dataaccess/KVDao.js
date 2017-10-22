@@ -5,28 +5,33 @@ const KVSignatureError = require("../model/KVSignatureError");
 const sqlite = require("sqlite3");
 const db = new sqlite.Database(config.database.path);
 
-const getAllSql = "select key, value from kvstore";
-const getValueSql = "select value from kvstore where key = ?";
-const putValueSql = "insert or replace into kvstore (key, value) values (?, ?)";
-const getKeysSql = "select key from kvstore";
-const getKeysWithValueSql = "select key from kvstore where value = ?";
+const getAllSql = "select * from kvstore";
+const getValueSql = "select * from kvstore where key = ?";
+const putValueSql = "insert or replace into kvstore (key, value, signature) values (?, ?, ?)";
+const getKeysSql = "select * from kvstore";
 const deleteValueSql = "delete from kvstore where key = ?";
 const createKVStoreSql = " " +
 		"create table if not exists kvstore ( " +
 		"    key text not null primary key, " +
-		"    value text " +
+		"    value text not null, " +
+		"    signature text not null " +
 		") without rowid ";
 const dropKVStoreSql = "drop table if exists kvstore";
 
 module.exports = exports = {
 	getAll: (callback) => {
-		db.all(getAllSql, (err, allRows) => {
+		db.all(getAllSql, (err, rows) => {
 			if (err) {
 				callback(err);
 				return;
 			}
 
-			callback(undefined, allRows);
+			if (!confirmSignatureOfRows(rows)) {
+				callback(KVSignatureError());
+				return;
+			}
+
+			callback(undefined, rows);
 		});
 	},
 
@@ -34,6 +39,16 @@ module.exports = exports = {
 		db.get(getValueSql, [key], (err, row) => {
 			if (err) {
 				callback(err);
+				return;
+			}
+
+			if (!row) {
+				callback();
+				return;
+			}
+
+			if (!confirmSignatureOfRow(row)) {
+				callback(KVSignatureError());
 				return;
 			}
 
@@ -47,7 +62,9 @@ module.exports = exports = {
 	},
 
 	putValue: (key, value, callback) => {
-		db.run(putValueSql, [key, value], (err) => {
+		const signature = KVCrypt.sign(key, value);
+
+		db.run(putValueSql, [key, value, signature], (err) => {
 			if (err) {
 				callback(err);
 				return;
@@ -61,6 +78,11 @@ module.exports = exports = {
 		db.all(getKeysSql, (err, rows) => {
 			if (err) {
 				callback(err);
+				return;
+			}
+
+			if (!confirmSignatureOfRows(rows)) {
+				callback(KVSignatureError());
 				return;
 			}
 
@@ -109,3 +131,25 @@ module.exports = exports = {
 		});
 	}
 };
+
+function confirmSignatureOfRows(rows) {
+	let valid = true;
+
+	rows.every((row) => {
+		if (!confirmSignatureOfRow(row)) {
+			valid = false;
+			return false;
+		}
+		return true;
+	});
+
+	return valid;
+}
+
+function confirmSignatureOfRow(row) {
+	const key = row.key;
+	const value = row.value;
+	const signature = row.signature;
+
+	return KVCrypt.confirmSignature(key, value, signature);
+}

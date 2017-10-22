@@ -1,4 +1,5 @@
 const config = require("../../config");
+const KVKeysInitializedError = require("../model/KVKeysInitializedError");
 
 const fs = require("fs");
 const crypto = require("crypto");
@@ -80,12 +81,31 @@ module.exports = exports = {
 				return;
 			}
 
+			if (!encryptionKey || !signingKey) {
+				callback(KVKeysInitializedError());
+				return;
+			}
+
 			callback();
 		});
 	},
 
-	sign: (value) => {
-		return hmac(value, signingKey);
+	sign: (key, value) => {
+		return hmac(key, value, signingKey);
+	},
+
+	confirmSignature: (key, value, expectedSignature) => {
+		if (!value) {
+			return false;
+		}
+
+		const signature = hmac(key, value, signingKey);
+
+		if (!signature) {
+			return false;
+		}
+
+		return signature === expectedSignature;
 	}
 };
 
@@ -185,10 +205,11 @@ function separateIVFromCipherText(fullCipherText) {
 	};
 }
 
-function hmac(value, key) {
+function hmac(key, value) {
 	const algorithm = signingConfig.algorithm;
 
 	const hash = crypto.createHash(algorithm);
+	hash.update(key); 
 	hash.update(value);
 	const hashValue = hash.digest("hex");
 

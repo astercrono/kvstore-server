@@ -30,21 +30,35 @@ describe("KVCrypt", () => {
 	});
 
 	it("sign()", (done) => {
+		const originalKey = "helloKey";
 		const originalValue = "Hello World.";
+
+		const goodKey = "helloKey";
 		const goodValue = "Hello World.";
+
+		const badKey = "helluKey";
 		const badValue = "Hellu World";
 
-		const signature = KVCrypt.sign(originalValue);
+		const signature = KVCrypt.sign(originalKey, originalValue);
 		assert.ok(signature);
 
-		const goodSignature = KVCrypt.sign(goodValue);
-		assert.ok(goodSignature);
-		assert.equal(goodSignature, signature);
-
-		const badSignature = KVCrypt.sign(badValue);
-		assert.ok(badSignature);
-		assert.notEqual(badSignature, signature);
+		confirmGoodSignature(goodKey, goodValue, signature);
+		confirmBadSignature(goodKey, badValue, signature);
+		confirmBadSignature(badKey, goodValue, signature);
+		confirmBadSignature(badKey, badValue, signature);
 
 		done();
 	});
 });
+
+function confirmGoodSignature(key, value, expectedSignature) {
+	const goodSignature = KVCrypt.sign(key, value);
+	assert.ok(goodSignature);
+	assert.equal(goodSignature, expectedSignature);	
+}
+
+function confirmBadSignature(key, value, expectedSignature) {
+	let badSignature = KVCrypt.sign(key, value);
+	assert.ok(badSignature);
+	assert.notEqual(badSignature, expectedSignature);
+}

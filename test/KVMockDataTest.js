@@ -55,10 +55,7 @@ module.exports = exports = (test) => {
 					});
 				}
 			], (error, results) => {
-				if (error) {
-					callback(error);
-					return;
-				}
+				assert.ok(!error);
 				done();
 			});
 		},
