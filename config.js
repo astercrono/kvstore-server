@@ -19,7 +19,7 @@ module.exports = exports = {
 		"pbkdf2": {
 			"saltLength": 64,
 			"passwordLength": 64,
-			"iterations": 10000,
+			"iterations": 500000,
 			"algorithm": "sha512",
 		},
 		"signing": {
