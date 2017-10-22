@@ -13,16 +13,19 @@ module.exports = exports = {
 			"blockMode": "cbc",
 			"keyLength": 32,
 			"ivLength": 16,
-			"saltLength": 64,
-			"passwordLength": 64,
-			"pbkdf2Iterations": 10000,
-			"pbkdf2Algorithm": "sha512",
 			"algorithm": "aes-256-cbc",
 			"keyDelimiter": "$"
 		},
+		"pbkdf2": {
+			"saltLength": 64,
+			"passwordLength": 64,
+			"iterations": 10000,
+			"algorithm": "sha512",
+		},
 		"signing": {
 			"path": path.join(__dirname, "/kvstore-signing.secret"),
-			"algorithm": "sha512"
+			"algorithm": "sha512",
+			"keyLength": 32,
 		}
 	}
 };

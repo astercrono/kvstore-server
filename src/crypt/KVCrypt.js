@@ -1,16 +1,21 @@
 const config = require("../../config");
+const KVSecrets = require("../model/KVSecrets");
+
 const fs = require("fs");
 const crypto = require("crypto");
+const async = require("async");
 
 const encryptionConfig = config.crypt.encryption;
 const signingConfig = config.crypt.signing;
+const pbkdf2Config = config.crypt.pbkdf2;
 
 module.exports = exports = {
 	encrypt: (plaintext, callback) => {
+		const path = encryptionConfig.path;
 		const ivLength = encryptionConfig.ivLength;
 		const algorithm = encryptionConfig.algorithm;
 
-		readKeyFile((err, keyBuffer) => {
+		readKeyFile(path, (err, keyBuffer) => {
 			if (err) {
 				callback(err);
 				return;
@@ -30,9 +35,10 @@ module.exports = exports = {
 	},
 
 	decrypt: (cipherText, callback) => {
+		const path = encryptionConfig.path;
 		const algorithm = encryptionConfig.algorithm;
 
-		readKeyFile((err, key) => {
+		readKeyFile(path, (err, key) => {
 			if (err) {
 				callback(err);
 				return;
@@ -50,36 +56,92 @@ module.exports = exports = {
 		});
 	},
 
-	initKey: (overwrite, callback) => {
-		readKeyFile((err, key) => {
-			if (err || overwrite) {
-				createKey((err, buffer) => {
+	initSecrets: (overwrite, callback) => {
+		let encryptionKey = undefined;
+		let signingKey = undefined;
+
+		async.parallel([
+			(asyncCallback) => {
+				const length = encryptionConfig.keyLength;
+				const path = encryptionConfig.path;
+
+				initKey(path, length, overwrite, (err, key) => {
+					if (err) {
+						asyncCallback(err);
+						return;
+					}
+
+					asyncCallback(undefined, key);
+				});
+			},
+			(asyncCallback) => {
+				const length = signingConfig.keyLength;
+				const path = signingConfig.path;
+
+				initKey(path, length, overwrite, (err, key) => {
+					if (err) {
+						asyncCallback(err);
+						return;
+					}
+
+					asyncCallback(undefined, key);
+				});
+			}
+		], (err, results) => {
+			if (err) {
+				callback(err);
+				return;
+			}
+
+			const secrets = KVSecrets(encryptionKey, signingKey);
+			callback(undefined, secrets);
+		});
+	},
+
+	sign: (value, callback) => {
+		const path = signingConfig.path;
+
+		readKeyFile(path, (err, key) => {
+			if (err) {
+				callback(err);
+				return;
+			}
+
+			const signature = hmac(value, key);
+			callback(undefined, signature);
+		});
+	}
+};
+
+function initKey(path, length, overwrite, callback) {
+	readKeyFile(path, (err, key) => {
+		if (err || overwrite) {
+			createKey(length, (err, buffer) => {
+				if (err) {
+					callback(err);
+					return;
+				}
+
+				const newKey = buffer.toString("hex");
+
+				fs.writeFile(path, newKey, (err) => {
 					if (err) {
 						callback(err);
 						return;
 					}
 
-					const newKey = buffer.toString("hex");
-
-					fs.writeFile(encryptionConfig.path, newKey, (err) => {
-						if (err) {
-							callback(err);
-							return;
-						}
-
-						callback(undefined, newKey);
-					});
+					callback(undefined, newKey);
 				});
-				return;
-			}
+			});
+			return;
+		}
 
-			callback(undefined, key);
-		});
-	}
-};
+		callback(undefined, key);
+	});
+}
 
-function createKey(callback) {
-	pbkdf2(encryptionConfig.keyLength, (err, key) => {
+function createKey(length, callback) {
+	pbkdf2(length, (err, key) => {
 		if (err) {
 			callback(err);
 			return;
@@ -89,8 +151,8 @@ function createKey(callback) {
 	});
 }
 
-function readKeyFile(callback) {
-	fs.readFile(encryptionConfig.path, "utf8", (err, key) => {
+function readKeyFile(path, callback) {
+	fs.readFile(path, "utf8", (err, key) => {
 		if (err) {
 			callback(err);
 			return;
@@ -113,10 +175,10 @@ function generateRandomHexString(length, callback) {
 }
 
 function pbkdf2(length, callback) {
-	const saltLength = encryptionConfig.saltLength;
-	const passwordLength = encryptionConfig.passwordLength;
-	const algorithm = encryptionConfig.pbkdf2Algorithm;
-	const iterations = encryptionConfig.pbkdf2Iterations;
+	const saltLength = pbkdf2Config.saltLength;
+	const passwordLength = pbkdf2Config.passwordLength;
+	const algorithm = pbkdf2Config.algorithm;
+	const iterations = pbkdf2Config.iterations;
 
 	generateRandomHexString(saltLength, (err, salt) => {
 		generateRandomHexString(passwordLength, (err, password) => {
@@ -145,4 +207,16 @@ function separateIVFromCipherText(fullCipherText) {
 		"iv": iv,
 		"cipherText": cipherText
 	};
+}
+
+function hmac(value, key) {
+	const algorithm = signingConfig.algorithm;
+
+	const hash = crypto.createHash(algorithm);
+	hash.update(value);
+	const hashValue = hash.digest("hex");
+
+	const hmac = crypto.createHmac(algorithm, key);
+	hmac.update(hashValue);
+	return hmac.digest("hex");
 }

@@ -18,7 +18,7 @@ module.exports = exports = (overwriteKey) => {
 
 				Controllers(app);
 
-				KVCrypt.initKey(overwriteKey, (err, key) => {
+				KVCrypt.initSecrets(overwriteKey, (err, key) => {
 					if (err) {
 						callback(err);
 						return;
