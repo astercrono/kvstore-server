@@ -1,4 +1,6 @@
 const config = require("../../config.js");
+const KVCrypt = require("../crypt/KVCrypt");
+const KVSignatureError = require("../model/KVSignatureError");
 
 const sqlite = require("sqlite3");
 const db = new sqlite.Database(config.database.path);
@@ -18,13 +20,13 @@ const dropKVStoreSql = "drop table if exists kvstore";
 
 module.exports = exports = {
 	getAll: (callback) => {
-		db.all(getAllSql, (err, rows) => {
+		db.all(getAllSql, (err, allRows) => {
 			if (err) {
 				callback(err);
 				return;
 			}
 
-			callback(undefined, rows);
+			callback(undefined, allRows);
 		});
 	},
 

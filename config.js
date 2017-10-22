@@ -25,7 +25,7 @@ module.exports = exports = {
 		"signing": {
 			"path": path.join(__dirname, "/kvstore-signing.secret"),
 			"algorithm": "sha512",
-			"keyLength": 32,
+			"keyLength": 32
 		}
 	}
 };

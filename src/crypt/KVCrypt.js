@@ -1,5 +1,4 @@
 const config = require("../../config");
-const KVSecrets = require("../model/KVSecrets");
 
 const fs = require("fs");
 const crypto = require("crypto");
@@ -9,28 +8,24 @@ const encryptionConfig = config.crypt.encryption;
 const signingConfig = config.crypt.signing;
 const pbkdf2Config = config.crypt.pbkdf2;
 
+let encryptionKey = undefined;
+let signingKey = undefined;
+
 module.exports = exports = {
 	encrypt: (plaintext, callback) => {
 		const path = encryptionConfig.path;
 		const ivLength = encryptionConfig.ivLength;
 		const algorithm = encryptionConfig.algorithm;
 
-		readKeyFile(path, (err, keyBuffer) => {
-			if (err) {
-				callback(err);
-				return;
-			}
+		pbkdf2(ivLength, (err, ivBuffer) => {
+			const cipher = crypto.createCipheriv(algorithm, encryptionKey, ivBuffer);
+			cipher.update(plaintext, "utf8");
 
-			pbkdf2(ivLength, (err, ivBuffer) => {
-				const cipher = crypto.createCipheriv(algorithm, keyBuffer, ivBuffer);
-				cipher.update(plaintext, "utf8");
+			const cipherText = cipher.final("hex");
+			const ivString = ivBuffer.toString("hex");
+			const fullCipherText = addIVToCipherText(cipherText, ivString);
 
-				const cipherText = cipher.final("hex");
-				const ivString = ivBuffer.toString("hex");
-				const fullCipherText = addIVToCipherText(cipherText, ivString);
-
-				callback(undefined, fullCipherText);
-			});
+			callback(undefined, fullCipherText);
 		});
 	},
 
@@ -38,28 +33,18 @@ module.exports = exports = {
 		const path = encryptionConfig.path;
 		const algorithm = encryptionConfig.algorithm;
 
-		readKeyFile(path, (err, key) => {
-			if (err) {
-				callback(err);
-				return;
-			}
+		const secret = separateIVFromCipherText(cipherText);
+		const ivBuffer = Buffer.from(secret.iv, "hex");
+		const splitCipherText = secret.cipherText;
 
-			const secret = separateIVFromCipherText(cipherText);
-			const ivBuffer = Buffer.from(secret.iv, "hex");
-			const splitCipherText = secret.cipherText;
-
-			const decipher = crypto.createDecipheriv(algorithm, key, ivBuffer);
-			decipher.update(splitCipherText, "hex");
-		
-			const plaintext = decipher.final("utf8");
-			callback(undefined, plaintext);
-		});
+		const decipher = crypto.createDecipheriv(algorithm, encryptionKey, ivBuffer);
+		decipher.update(splitCipherText, "hex");
+	
+		const plaintext = decipher.final("utf8");
+		callback(undefined, plaintext);
 	},
 
 	initSecrets: (overwrite, callback) => {
-		let encryptionKey = undefined;
-		let signingKey = undefined;
-
 		async.parallel([
 			(asyncCallback) => {
 				const length = encryptionConfig.keyLength;
@@ -71,7 +56,8 @@ module.exports = exports = {
 						return;
 					}
 
-					asyncCallback(undefined, key);
+					encryptionKey = key;
+					asyncCallback(undefined);
 				});
 			},
 			(asyncCallback) => {
@@ -84,7 +70,8 @@ module.exports = exports = {
 						return;
 					}
 
-					asyncCallback(undefined, key);
+					signingKey = key;
+					asyncCallback(undefined);
 				});
 			}
 		], (err, results) => {
@@ -93,23 +80,12 @@ module.exports = exports = {
 				return;
 			}
 
-			const secrets = KVSecrets(encryptionKey, signingKey);
-			callback(undefined, secrets);
+			callback();
 		});
 	},
 
-	sign: (value, callback) => {
-		const path = signingConfig.path;
-
-		readKeyFile(path, (err, key) => {
-			if (err) {
-				callback(err);
-				return;
-			}
-
-			const signature = hmac(value, key);
-			callback(undefined, signature);
-		});
+	sign: (value) => {
+		return hmac(value, signingKey);
 	}
 };
 
@@ -130,7 +106,7 @@ function initKey(path, length, overwrite, callback) {
 						return;
 					}
 
-					callback(undefined, newKey);
+					callback(undefined, buffer);
 				});
 			});
 			return;

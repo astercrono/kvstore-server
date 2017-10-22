@@ -10,7 +10,6 @@ describe("KVCrypt", () => {
 	before((done) => {
 		KVCrypt.initSecrets(true, (err, key) => {
 			assert.ok(!err);
-			assert.ok(key);
 			done();
 		});
 	});
@@ -35,32 +34,17 @@ describe("KVCrypt", () => {
 		const goodValue = "Hello World.";
 		const badValue = "Hellu World";
 
-		KVCrypt.sign(originalValue, (err, signature) => {
-			assert.ok(!err);
-			assert.ok(signature);
+		const signature = KVCrypt.sign(originalValue);
+		assert.ok(signature);
 
-			async.parallel([
-				(asyncCallback) => {
-					KVCrypt.sign(goodValue, (err, goodSignature) => {
-						assert.ok(!err);
-						assert.ok(goodSignature);
-						assert.equal(goodSignature, signature);
-						asyncCallback(undefined, goodSignature);
-					});
-				},
-				(asyncCallback) => {
-					KVCrypt.sign(badValue, (err, badSignature) => {
-						assert.ok(!err);
-						assert.ok(badSignature);
-						assert.notEqual(badSignature, signature);
-						asyncCallback(undefined, badSignature);
-					});
-				}
-			], (err, results) => {
-				assert.ok(!err);
-				assert.equal(results.length, 2);
-				done();
-			});
-		});
+		const goodSignature = KVCrypt.sign(goodValue);
+		assert.ok(goodSignature);
+		assert.equal(goodSignature, signature);
+
+		const badSignature = KVCrypt.sign(badValue);
+		assert.ok(badSignature);
+		assert.notEqual(badSignature, signature);
+
+		done();
 	});
 });
