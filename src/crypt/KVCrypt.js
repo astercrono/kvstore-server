@@ -213,7 +213,7 @@ function hmac(key, value) {
 	hash.update(value);
 	const hashValue = hash.digest("hex");
 
-	const hmac = crypto.createHmac(algorithm, key);
+	const hmac = crypto.createHmac(algorithm, signingKey);
 	hmac.update(hashValue);
 	return hmac.digest("hex");
 }
