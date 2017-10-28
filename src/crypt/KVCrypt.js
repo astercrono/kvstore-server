@@ -1,24 +1,63 @@
 const config = require("../../config");
-const KVKeysInitializedError = require("../model/KVKeysInitializedError");
 
-const fs = require("fs");
 const crypto = require("crypto");
 const async = require("async");
 
+const KeyStore = require("./KeyStore");
+const KeyOptions = require("./KeyOptions");
+const KeyGenerator = require("./KeyGenerator");
+const KVSigner = require("./KVSigner");
+const KeysInitializedError = require("../error/KeysInitializedError");
+const EncryptionError = require("../error/EncryptionError");
+const DecryptionError = require("../error/DecryptionError");
+
 const encryptionConfig = config.crypt.encryption;
 const signingConfig = config.crypt.signing;
-const pbkdf2Config = config.crypt.pbkdf2;
+const apiConfig = config.crypt.api;
 
-let encryptionKey = undefined;
-let signingKey = undefined;
+const ivConfig = encryptionConfig.iv;
+ivConfig.saltLength = 16;
+ivConfig.passwordLength = 16;
 
-module.exports = exports = {
+const ivGenerator = KeyGenerator(KeyOptions(ivConfig));
+
+let keyStore = undefined;
+let kvSigner = undefined;
+
+const KVCrypt = {
+	initKeys: (overwrite, callback) => {
+		if (keyStore) {
+			callback();
+			return;
+		}
+
+		keyStore = KeyStore();
+		keyStore.init(overwrite, (err, keys) => {
+			if (err) {
+				keyStore = undefined;
+				kvSigner = undefined;
+
+				callback(err);
+				return;
+			}
+
+			kvSigner = KVSigner(keyStore.get("signing"));
+
+			callback();
+		});
+	},
+
 	encrypt: (plaintext, callback) => {
-		const path = encryptionConfig.path;
-		const ivLength = encryptionConfig.ivLength;
 		const algorithm = encryptionConfig.algorithm;
+		const encryptionKey = keyStore.get("encryption");
 
-		pbkdf2(ivLength, (err, ivBuffer) => {
+		ivGenerator.generate((err, iv) => {
+			if (err) {
+				callback(err);
+				return;
+			}
+
+			const ivBuffer = Buffer.from(iv, "hex");
 			const cipher = crypto.createCipheriv(algorithm, encryptionKey, ivBuffer);
 			cipher.update(plaintext, "utf8");
 
@@ -31,8 +70,8 @@ module.exports = exports = {
 	},
 
 	decrypt: (cipherText, callback) => {
-		const path = encryptionConfig.path;
 		const algorithm = encryptionConfig.algorithm;
+		const encryptionKey = keyStore.get("encryption");
 
 		const secret = separateIVFromCipherText(cipherText);
 		const ivBuffer = Buffer.from(secret.iv, "hex");
@@ -45,150 +84,14 @@ module.exports = exports = {
 		callback(undefined, plaintext);
 	},
 
-	initSecrets: (overwrite, callback) => {
-		async.parallel([
-			(asyncCallback) => {
-				const length = encryptionConfig.keyLength;
-				const path = encryptionConfig.path;
-
-				initKey(path, length, overwrite, (err, key) => {
-					if (err) {
-						asyncCallback(err);
-						return;
-					}
-
-					encryptionKey = key;
-					asyncCallback(undefined);
-				});
-			},
-			(asyncCallback) => {
-				const length = signingConfig.keyLength;
-				const path = signingConfig.path;
-
-				initKey(path, length, overwrite, (err, key) => {
-					if (err) {
-						asyncCallback(err);
-						return;
-					}
-
-					signingKey = key;
-					asyncCallback(undefined);
-				});
-			}
-		], (err, results) => {
-			if (err) {
-				callback(err);
-				return;
-			}
-
-			if (!encryptionKey || !signingKey) {
-				callback(KVKeysInitializedError());
-				return;
-			}
-
-			callback();
-		});
+	signKV: (key, value) => {
+		return kvSigner.sign(key, value);
 	},
 
-	sign: (key, value) => {
-		return hmac(key, value, signingKey);
-	},
-
-	confirmSignature: (key, value, expectedSignature) => {
-		if (!value) {
-			return false;
-		}
-
-		const signature = hmac(key, value, signingKey);
-
-		if (!signature) {
-			return false;
-		}
-
-		return signature === expectedSignature;
+	confirmKVSignature: (key, value, expectedSignature) => {
+		return kvSigner.confirm(key, value, expectedSignature);
 	}
 };
-
-function initKey(path, length, overwrite, callback) {
-	readKeyFile(path, (err, key) => {
-		if (err || overwrite) {
-			createKey(length, (err, buffer) => {
-				if (err) {
-					callback(err);
-					return;
-				}
-
-				const newKey = buffer.toString("hex");
-
-				fs.writeFile(path, newKey, (err) => {
-					if (err) {
-						callback(err);
-						return;
-					}
-
-					callback(undefined, buffer);
-				});
-			});
-			return;
-		}
-
-		callback(undefined, key);
-	});
-}
-
-function createKey(length, callback) {
-	pbkdf2(length, (err, key) => {
-		if (err) {
-			callback(err);
-			return;
-		}
-
-		callback(undefined, key);
-	});
-}
-
-function readKeyFile(path, callback) {
-	fs.readFile(path, "utf8", (err, key) => {
-		if (err) {
-			callback(err);
-			return;
-		}
-
-		callback(undefined, Buffer.from(key, "hex"));
-	});
-}
-
-function generateRandomHexString(length, callback) {
-	crypto.randomBytes(length, (err, buff) => {
-		if (err) {
-			callback(err);
-			return;
-		}
-
-		const value = buff.toString("hex");
-		callback(undefined, value);
-	});
-}
-
-function pbkdf2(length, callback) {
-	const saltLength = pbkdf2Config.saltLength;
-	const passwordLength = pbkdf2Config.passwordLength;
-	const algorithm = pbkdf2Config.algorithm;
-	const iterations = pbkdf2Config.iterations;
-
-	generateRandomHexString(saltLength, (err, salt) => {
-		generateRandomHexString(passwordLength, (err, password) => {
-			crypto.pbkdf2(password, salt, iterations, length, algorithm, (err, buffer) => {
-				if (err) {
-					callback(err);
-					return;
-				}
-
-				callback(undefined, buffer);
-			});
-		});
-	});
-}
 
 function addIVToCipherText(cipherText, iv) {
 	return iv + encryptionConfig.keyDelimiter + cipherText;
@@ -205,15 +108,4 @@ function separateIVFromCipherText(fullCipherText) {
 	};
 }
 
-function hmac(key, value) {
-	const algorithm = signingConfig.algorithm;
-
-	const hash = crypto.createHash(algorithm);
-	hash.update(key); 
-	hash.update(value);
-	const hashValue = hash.digest("hex");
-
-	const hmac = crypto.createHmac(algorithm, signingKey);
-	hmac.update(hashValue);
-	return hmac.digest("hex");
-}
+module.exports = exports = KVCrypt;

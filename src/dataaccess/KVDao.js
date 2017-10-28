@@ -1,6 +1,6 @@
 const config = require("../../config.js");
 const KVCrypt = require("../crypt/KVCrypt");
-const KVSignatureError = require("../model/KVSignatureError");
+const KVSignatureError = require("../error/KVSignatureError");
 
 const sqlite = require("sqlite3");
 const db = new sqlite.Database(config.database.path);
@@ -27,7 +27,7 @@ module.exports = exports = {
 			}
 
 			if (!confirmSignatureOfRows(rows)) {
-				callback(KVSignatureError());
+				callback(new KVSignatureError());
 				return;
 			}
 
@@ -48,7 +48,7 @@ module.exports = exports = {
 			}
 
 			if (!confirmSignatureOfRow(row)) {
-				callback(KVSignatureError());
+				callback(new KVSignatureError());
 				return;
 			}
 
@@ -62,7 +62,7 @@ module.exports = exports = {
 	},
 
 	putValue: (key, value, callback) => {
-		const signature = KVCrypt.sign(key, value);
+		const signature = KVCrypt.signKV(key, value);
 
 		db.run(putValueSql, [key, value, signature], (err) => {
 			if (err) {
@@ -82,7 +82,7 @@ module.exports = exports = {
 			}
 
 			if (!confirmSignatureOfRows(rows)) {
-				callback(KVSignatureError());
+				callback(new KVSignatureError());
 				return;
 			}
 
@@ -151,5 +151,5 @@ function confirmSignatureOfRow(row) {
 	const value = row.value;
 	const signature = row.signature;
 
-	return KVCrypt.confirmSignature(key, value, signature);
+	return KVCrypt.confirmKVSignature(key, value, signature);
 }

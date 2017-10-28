@@ -2,30 +2,37 @@ const path = require("path");
 
 module.exports = exports = {
 	"database": {
-		"path": path.join(__dirname, "/kvstore.db")
+		"path": path.join(__dirname, "/kvstore.db"),
+		"testPath": ":memory:"
 	},
 	"server": {
 		"port": 8080
 	},
 	"crypt": {
-		"encryption": {
-			"path": path.join(__dirname, "/kvstore.secret"),
-			"blockMode": "cbc",
-			"keyLength": 32,
-			"ivLength": 16,
-			"algorithm": "aes-256-cbc",
-			"keyDelimiter": "$"
+		"keystore": {
+			"path": path.join(__dirname, "/keystore.secret"),
+			"testPath": path.join(__dirname, "/keystore-test.secret")
 		},
-		"pbkdf2": {
-			"saltLength": 64,
-			"passwordLength": 64,
-			"iterations": 500000,
-			"algorithm": "sha512",
+		"encryption": {
+			"keyLength": 32,
+			"algorithm": "aes-256-cbc",
+			"iterations": 100000,
+			"keyDelimiter": "$",
+			"iv": {
+				"keyLength": 16,
+				"algorithm": "sha256",
+				"iterations": 10000
+			}
 		},
 		"signing": {
-			"path": path.join(__dirname, "/kvstore-signing.secret"),
+			"keyLength": 64,
 			"algorithm": "sha512",
-			"keyLength": 64
+			"iterations": 100000
+		},
+		"api": {
+			"keyLength": 64,
+			"algorithm": "sha512",
+			"iterations": 100000
 		}
 	}
 };

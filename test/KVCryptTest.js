@@ -4,11 +4,11 @@ const async = require("async");
 const KVCrypt = require("../src/crypt/KVCrypt");
 
 const config = require("../config");
-config.crypt.path = "kvstore-test.secret";
+config.crypt.path = config.crypt.testPath;
 
 describe("KVCrypt", () => {
 	before((done) => {
-		KVCrypt.initSecrets(true, (err, key) => {
+		KVCrypt.initKeys(true, (err, key) => {
 			assert.ok(!err);
 			done();
 		});
@@ -39,7 +39,7 @@ describe("KVCrypt", () => {
 		const badKey = "helluKey";
 		const badValue = "Hellu World";
 
-		const signature = KVCrypt.sign(originalKey, originalValue);
+		const signature = KVCrypt.signKV(originalKey, originalValue);
 		assert.ok(signature);
 
 		confirmGoodSignature(goodKey, goodValue, signature);
@@ -52,13 +52,13 @@ describe("KVCrypt", () => {
 });
 
 function confirmGoodSignature(key, value, expectedSignature) {
-	const goodSignature = KVCrypt.sign(key, value);
+	const goodSignature = KVCrypt.signKV(key, value);
 	assert.ok(goodSignature);
 	assert.equal(goodSignature, expectedSignature);	
 }
 
 function confirmBadSignature(key, value, expectedSignature) {
-	let badSignature = KVCrypt.sign(key, value);
+	let badSignature = KVCrypt.signKV(key, value);
 	assert.ok(badSignature);
 	assert.notEqual(badSignature, expectedSignature);
 }
