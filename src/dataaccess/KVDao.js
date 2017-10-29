@@ -1,6 +1,7 @@
 const config = require("../../config.js");
 const KVCrypt = require("../crypt/KVCrypt");
 const KVSignatureError = require("../error/KVSignatureError");
+const KeyValue = require("../model/KeyValue");
 
 const sqlite = require("sqlite3");
 const db = new sqlite.Database(config.database.path);
@@ -31,7 +32,12 @@ module.exports = exports = {
 				return;
 			}
 
-			callback(undefined, rows);
+			const keyValues = [];
+			rows.forEach((row) => {
+				keyValues.push(KeyValue(row.key, row.value));
+			});
+
+			callback(undefined, keyValues);
 		});
 	},
 
