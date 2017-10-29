@@ -90,6 +90,10 @@ const KVCrypt = {
 
 	confirmKVSignature: (key, value, expectedSignature) => {
 		return kvSigner.confirm(key, value, expectedSignature);
+	},
+
+	confirmApiKey: (token) => {
+		return token && token === keyStore.get("api");
 	}
 };
 

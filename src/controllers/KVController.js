@@ -1,19 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const bodyParser = require("body-parser");
+const AuthenticationInterceptor = require("./AuthenticationInterceptor");
 
 const ResponseSender = require("./ResponseSender");
 const KVService = require("../services/KVService");
 
 const jsonParser = bodyParser.json();
+const authInterceptor = AuthenticationInterceptor();
 
-router.get("/all",  (request, response) => {
+router.get("/all",  authInterceptor, (request, response) => {
 	KVService.getAll((err, rows) => {
 		ResponseSender.send(response, rows);
 	});
 });
 
-router.get("/value/:key",  (request, response) => {
+router.get("/value/:key",  authInterceptor, (request, response) => {
 	if (!("key" in request.params)) {
 		ResponseSender.failParam(response);
 		return;
@@ -30,7 +32,7 @@ router.get("/value/:key",  (request, response) => {
 	});
 });
 
-router.get("/keys",  (request, response) => {
+router.get("/keys",  authInterceptor, (request, response) => {
 	KVService.getKeys((err, keys) => {
 		if (err) {
 			ResponseSender.failInternalError(response);
@@ -40,7 +42,7 @@ router.get("/keys",  (request, response) => {
 	});
 });
 
-router.put("/value", jsonParser, (request, response) => {
+router.put("/value", [authInterceptor, jsonParser], (request, response) => {
 	const model = request.body;
 
 	if (!("key" in model) || !("value" in model)) {
@@ -59,7 +61,7 @@ router.put("/value", jsonParser, (request, response) => {
 	});
 });
 
-router.delete("/value", jsonParser, (request, response) => {
+router.delete("/value", [authInterceptor, jsonParser], (request, response) => {
 	const model = request.body;
 
 	if (!("key" in model)) {
