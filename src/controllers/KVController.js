@@ -2,20 +2,20 @@ const express = require("express");
 const router = express.Router();
 const bodyParser = require("body-parser");
 
-const ControllerUtil = require("../util/ControllerUtil");
+const ResponseSender = require("./ResponseSender");
 const KVService = require("../services/KVService");
 
 const jsonParser = bodyParser.json();
 
 router.get("/all",  (request, response) => {
 	KVService.getAll((err, rows) => {
-		ControllerUtil.send(response, rows);
+		ResponseSender.send(response, rows);
 	});
 });
 
 router.get("/value/:key",  (request, response) => {
 	if (!("key" in request.params)) {
-		ControllerUtil.failParam(response);
+		ResponseSender.failParam(response);
 		return;
 	}
 
@@ -23,20 +23,20 @@ router.get("/value/:key",  (request, response) => {
 
 	KVService.getValue(key, (err, keys) => {
 		if (err) {
-			ControllerUtil.failInternalError(response);
+			ResponseSender.failInternalError(response);
 			return;
 		}
-		ControllerUtil.send(response, keys);
+		ResponseSender.send(response, keys);
 	});
 });
 
 router.get("/keys",  (request, response) => {
 	KVService.getKeys((err, keys) => {
 		if (err) {
-			ControllerUtil.failInternalError(response);
+			ResponseSender.failInternalError(response);
 			return;
 		}
-		ControllerUtil.send(response, keys);
+		ResponseSender.send(response, keys);
 	});
 });
 
@@ -44,7 +44,7 @@ router.put("/value", jsonParser, (request, response) => {
 	const model = request.body;
 
 	if (!("key" in model) || !("value" in model)) {
-		ControllerUtil.failParam(response);
+		ResponseSender.failParam(response);
 	}
 
 	const key = model.key;
@@ -52,10 +52,10 @@ router.put("/value", jsonParser, (request, response) => {
 
 	KVService.putValue(key, value, (err) => {
 		if (err) {
-			ControllerUtil.failInternalError(response);
+			ResponseSender.failInternalError(response);
 			return;
 		}
-		ControllerUtil.send(response);
+		ResponseSender.send(response);
 	});
 });
 
@@ -63,22 +63,22 @@ router.delete("/value", jsonParser, (request, response) => {
 	const model = request.body;
 
 	if (!("key" in model)) {
-		ControllerUtil.failParam(response);
+		ResponseSender.failParam(response);
 	}
 
 	const key = model.key;
 
 	KVService.deleteValue(key, (err) => {
 		if (err) {
-			ControllerUtil.failInternalError(response);
+			ResponseSender.failInternalError(response);
 			return;
 		}
-		ControllerUtil.send(response);
+		ResponseSender.send(response);
 	});
 });
 
 router.all("*", (request, response) => {
-	ControllerUtil.failUnknownRoute(response);
+	ResponseSender.failUnknownRoute(response);
 });
 
 module.exports = exports = router;
