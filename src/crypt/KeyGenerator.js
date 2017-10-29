@@ -49,19 +49,4 @@ function generateRandomHexString(length, callback) {
 	});
 }
 
-function pbkdf2(length, algorithm, callback) {
-	generateRandomHexString(saltLength, (err, salt) => {
-		generateRandomHexString(passwordLength, (err, password) => {
-			crypto.pbkdf2(password, salt, iterations, length, algorithm, (err, buffer) => {
-				if (err) {
-					callback(err);
-					return;
-				}
-
-				callback(undefined, buffer);
-			});
-		});
-	});
-}
-
 module.exports = exports = KeyGenerator;
