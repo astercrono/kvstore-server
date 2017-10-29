@@ -55,7 +55,7 @@ router.put("/value", jsonParser, (request, response) => {
 			ResponseSender.failInternalError(response);
 			return;
 		}
-		ResponseSender.send(response);
+		ResponseSender.send(response, {"key": key, "value": value});
 	});
 });
 
