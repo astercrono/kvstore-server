@@ -94,6 +94,10 @@ const KVCrypt = {
 
 	confirmApiKey: (token) => {
 		return token && token === keyStore.get("api");
+	},
+
+	getKey: (name) => {
+		return keyStore.get(name);
 	}
 };
 

@@ -1,4 +1,5 @@
 const config = require("../config");
+const KVCrypt = require("../src/crypt/KVCrypt");
 const run = require("./KVMockDataTest");
 
 const request = require("request");
@@ -19,7 +20,11 @@ function testKVController(context, assert) {
 		});
 
 		it("GET /all", (done) => {
-			request(url("/all"), function(err, response, body) {
+			request(url("/all"), {
+				"auth": {
+					"bearer": KVCrypt.getKey("api")
+				}	
+			}, function(err, response, body) {
 				assert.ok(!err);
 				assert.ok(body);
 				assert.equal(response.statusCode, 200);
@@ -28,7 +33,11 @@ function testKVController(context, assert) {
 		});
 
 		it("GET /value/:key", (done) => {
-			request(url("/value/key1"), function(err, response, body) {
+			request(url("/value/key1"), {
+				"auth": {
+					"bearer": KVCrypt.getKey("api")
+				}		
+			}, function(err, response, body) {
 				assert.ok(!err);
 				assert.ok(body);
 				assert.equal(response.statusCode, 200);
@@ -37,7 +46,11 @@ function testKVController(context, assert) {
 		});
 
 		it("GET /keys", (done) => {
-			request(url("/keys"), function(err, response, body) {
+			request(url("/keys"), {
+				"auth": {
+					"bearer": KVCrypt.getKey("api")
+				}	
+			}, function(err, response, body) {
 				assert.ok(!err);
 				assert.ok(body);
 				assert.equal(response.statusCode, 200);
@@ -52,10 +65,13 @@ function testKVController(context, assert) {
 				json: {
 					"key": "key5",
 					"value": "value5"
+				},
+				headers: {
+					"Authorization": "Bearer " + KVCrypt.getKey("api")
 				}
 			}, (err, response, body) => {
 				assert.ok(!err);
-				assert.ok(!body);
+				assert.ok(body);
 				assert.equal(response.statusCode, 200);
 				done();
 			});
@@ -67,10 +83,13 @@ function testKVController(context, assert) {
 				method: "DELETE",
 				json: {
 					"key": "key1",
+				},
+				headers: {
+					"Authorization": "Bearer " + KVCrypt.getKey("api")
 				}
 			}, (err, response, body) => {
 				assert.ok(!err);
-				assert.ok(!body);
+				assert.ok(body);
 				assert.equal(response.statusCode, 200);
 				done();
 			});
