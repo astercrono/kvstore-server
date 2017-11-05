@@ -6,10 +6,10 @@ const KeyValue = require("../model/KeyValue");
 const sqlite = require("sqlite3");
 const db = new sqlite.Database(config.database.path);
 
-const getAllSql = "select * from kvstore";
+const getAllSql = "select * from kvstore order by key ";
 const getValueSql = "select * from kvstore where key = ?";
 const putValueSql = "insert or replace into kvstore (key, value, signature) values (?, ?, ?)";
-const getKeysSql = "select * from kvstore";
+const getKeysSql = "select * from kvstore order by key ";
 const deleteValueSql = "delete from kvstore where key = ?";
 const createKVStoreSql = " " +
 		"create table if not exists kvstore ( " +

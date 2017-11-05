@@ -1,6 +1,7 @@
 const async = require("async");
 const run = require("./KVMockDataTest");
 const KVService = require("../src/services/KVService");
+const KVCrypt = require("../src/crypt/KVCrypt");
 
 function testKVService(context, assert) {
 	describe("KVService", () => {
@@ -112,6 +113,27 @@ function testKVService(context, assert) {
 
 		});
 
+		it("rebuild()", (done) => {
+			const originalKeyStore = KVCrypt.getKeyStore();
+
+			KVService.getAll((err, originalRows) => {
+				assert.ok(!err);
+
+				KVService.rebuild((err) => {
+					assert.ok(!err);
+
+					confirmKeyStoreChanged(assert, originalKeyStore);
+
+					KVService.getAll((err, newRows) => {
+						assert.ok(!err);
+
+						confirmKVRowsMatch(assert, originalRows, newRows);
+						done();
+					});
+				});
+			});
+		});
+
 		after((done) => {
 			context.destroy();
 			done();
@@ -125,3 +147,24 @@ run((context, assert) => {
 
 	testKVService(context, assert);
 }, false);
+
+function confirmKVRowsMatch(assert, actualRows, expectedRows) {
+	assert.equal(actualRows.length, expectedRows.length);
+
+	let i = 0;
+	while (i < expectedRows.length) {
+		const expected = expectedRows[i];
+		const actual = actualRows[i];
+
+		assert.equal(actual.key, expected.key);
+		assert.equal(actual.value, expected.value);
+
+		i++;
+	}
+}
+
+function confirmKeyStoreChanged(assert, originalKeyStore) {
+	const newKeyStore = KVCrypt.getKeyStore();
+
+	assert.ok(!originalKeyStore.equals(newKeyStore));
+}

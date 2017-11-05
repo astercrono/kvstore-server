@@ -26,7 +26,7 @@ let kvSigner = undefined;
 
 const KVCrypt = {
 	initKeys: (overwrite, callback) => {
-		if (keyStore) {
+		if (keyStore && !overwrite) {
 			callback();
 			return;
 		}
@@ -98,6 +98,10 @@ const KVCrypt = {
 
 	getKey: (name) => {
 		return keyStore.get(name);
+	},
+
+	getKeyStore: () => {
+		return keyStore;
 	}
 };
 

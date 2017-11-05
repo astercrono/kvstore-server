@@ -42,6 +42,17 @@ function KeyStore() {
 				return keys.get(name);
 			}
 			return undefined;
+		},
+
+		getKeys: () => {
+			return keys;
+		},
+
+		equals: (otherStore) => {
+			if (!keys || !otherStore || !otherStore.getKeys()) {
+				return false;
+			}
+			return keys.equals(otherStore.getKeys());
 		}
 	};
 }
