@@ -1,3 +1,4 @@
  - Write up a README.
  - /rebuild entry-point. Already have the service layer.
  - Logging
+ - Test Mode that switches to test versions of variables
