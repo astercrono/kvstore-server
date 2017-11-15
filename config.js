@@ -6,7 +6,11 @@ module.exports = exports = {
 		"testPath": ":memory:"
 	},
 	"server": {
-		"port": 8080
+		"port": 443,
+		"ssl": {
+			"keyPath": "/etc/ssl/private/kvstore.key",
+			"certPath": "/etc/ssl/certs/kvstore.crt"
+		}
 	},
 	"crypt": {
 		"keystore": {
