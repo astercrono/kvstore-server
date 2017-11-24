@@ -1,3 +1,2 @@
  - Write up a README.
- - /rebuild entry-point. Already have the service layer.
  - Logging
