@@ -1,4 +1,10 @@
-const config = require("../../config.js");
+const config = require("../../config.js").get();
+let path = config.database.path;
+
+if (config.testmode) {
+	path = config.database.testPath;
+}
+
 const KVCrypt = require("../crypt/KVCrypt");
 const KVSignatureError = require("../error/KVSignatureError");
 const KeyValue = require("../model/KeyValue");

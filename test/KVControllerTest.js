@@ -1,11 +1,13 @@
 const config = require("../config");
+config.enableTestMode();
+
 const KVCrypt = require("../src/crypt/KVCrypt");
 const run = require("./KVMockDataTest");
 
 const request = require("request");
 
 function testKVController(context, assert) {
-	const baseUrl = "http://localhost:" + config.server.port;
+	const baseUrl = "http://localhost:" + config.get().server.port;
 	const url = (path) => {
 		return baseUrl + path;
 	};
@@ -94,6 +96,21 @@ function testKVController(context, assert) {
 				done();
 			});
 		});	
+
+		if("POST /rebuild", (done) => {
+			request({
+				url: url("/rebuild"),
+				method: "PUT",
+				headers: {
+					"Authorization": "Bearer " + KVCrypt.getKey("api")
+				}
+			}, (err, response, body) => {
+				assert.ok(!err);
+				assert.ok(body);
+				assert.equal(response.statusCode, 200);
+				done();
+			});
+		});
 
 		after((done) => {
 			context.destroy();

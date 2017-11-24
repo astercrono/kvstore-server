@@ -1,5 +1,7 @@
 const async = require("async");
 
+const config = require("../../config").get();
+
 const KeyStoreInitError = require("../error/KeyStoreInitError");
 const KeysReader = require("./KeysReader");
 const KeysWriter= require("./KeysWriter");
@@ -7,11 +9,11 @@ const KeyGenerator = require("./KeyGenerator");
 const Keys = require("./Keys");
 const KeyOptions = require("./KeyOptions");
 
-const config = require("../../config");
-const path = config.crypt.keystore.path;
 const encryptionConfig = config.crypt.encryption;
 const signingConfig = config.crypt.signing;
 const apiConfig = config.crypt.api;
+
+let path = config.crypt.keystore.path;
 
 function KeyStore() {
 	let keys = undefined;

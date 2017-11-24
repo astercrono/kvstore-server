@@ -1,3 +1,6 @@
+const config = require("../config");
+config.enableTestMode();
+
 const async = require("async");
 const run = require("./KVMockDataTest");
 const KVService = require("../src/services/KVService");

@@ -1,7 +1,3 @@
-const config = require("../config");
-config.database.path = config.database.testPath;
-config.crypt.keystore.path = config.crypt.keystore.testPath;
-
 const KVServer = require("../src/KVServer");
 const KVService = require("../src/services/KVService");
 
@@ -13,7 +9,7 @@ module.exports = exports = (test) => {
 
 	test({
 		startServer: (done) => {
-			server.start(config.server.port, (err, listener) => {
+			server.start((err, listener) => {
 				assert.ok(!err);
 				assert.ok(listener);
 				done();	

@@ -79,6 +79,16 @@ router.delete("/value", [authInterceptor, jsonParser], (request, response) => {
 	});
 });
 
+router.post("/rebuild", [authInterceptor], (request, response) => {
+	KVService.rebuild((err) => {
+		if (err) {
+			ResponseSender.failInternalError(response);
+			return;
+		}
+		ResponseSender.send(response);
+	});
+});
+
 router.all("*", (request, response) => {
 	ResponseSender.failUnknownRoute(response);
 });

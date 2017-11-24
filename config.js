@@ -1,21 +1,18 @@
 const path = require("path");
 
-module.exports = exports = {
+const production = {
 	"database": {
-		"path": path.join(__dirname, "/kvstore.db"),
-		"testPath": ":memory:"
+		"path": path.join(__dirname, "/kvstore.db")
 	},
 	"server": {
 		"port": 443,
-		"ssl": {
-			"keyPath": "/etc/ssl/private/kvstore.key",
-			"certPath": "/etc/ssl/certs/kvstore.crt"
-		}
+		"sslEnabled": true,
+		"keyPath": "/etc/ssl/private/kvstore.key",
+		"certPath": "/etc/ssl/certs/kvstore.crt"
 	},
 	"crypt": {
 		"keystore": {
-			"path": path.join(__dirname, "/keystore.secret"),
-			"testPath": path.join(__dirname, "/keystore-test.secret")
+			"path": path.join(__dirname, "/keystore.secret")
 		},
 		"encryption": {
 			"keyLength": 32,
@@ -38,5 +35,23 @@ module.exports = exports = {
 			"algorithm": "sha512",
 			"iterations": 100000
 		}
+	}
+};
+
+const test = JSON.parse(JSON.stringify(production));
+test.database.path = ":memory:";
+test.server.sslEnabled = false;
+test.server.port = 8080;
+test.crypt.keystore.path = path.join(__dirname, "/keystore-test.secret");
+
+let activeConfig = production;
+
+module.exports = exports = {
+	enableTestMode: () => {
+		activeConfig = test;
+	},
+
+	get: () => {
+		return activeConfig;
 	}
 };

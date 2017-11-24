@@ -1,10 +1,10 @@
+const config = require("../config");
+config.enableTestMode();
+
 const assert = require("assert");
 const async = require("async");
 
 const KVCrypt = require("../src/crypt/KVCrypt");
-
-const config = require("../config");
-config.crypt.path = config.crypt.testPath;
 
 describe("KVCrypt", () => {
 	before((done) => {
