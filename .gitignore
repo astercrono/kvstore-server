@@ -2,3 +2,4 @@ node_modules
 *.db
 .vscode/launch.json
 *.secret
+.DS_Store
