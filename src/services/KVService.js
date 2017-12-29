@@ -126,6 +126,7 @@ function getAllRows(callback) {
 
 		if (!allRows|| allRows.length === 0) {
 			callback(undefined, allRows);
+			return;
 		}
 
 		const decryptOperations = [];
