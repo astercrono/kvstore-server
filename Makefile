@@ -26,6 +26,9 @@ build: init
 	@echo "Linting test"
 	@eslint test/ --ext .js
 
+run: $(modules)
+	@echo "running"
+
 test: build
 	@mocha
 
