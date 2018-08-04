@@ -1,2 +1,0 @@
- - Write up a README.
- - Logging

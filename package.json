@@ -1,7 +1,7 @@
 {
 	"name": "kvstore-server",
-	"version": "0.0.1",
-	"description": "A key-value store with a RESTful API.",
+	"version": "0.1.0",
+	"description": "An encrypted key-value store with a RESTful API.",
 	"contributors": [
 		{
 			"name": "Travis Kern",
@@ -20,7 +20,6 @@
 	"devDependencies": {
 		"gulp": "3.9.1",
 		"mocha": "4.0.1",
-		"eslint": "4.8.0",
-		"gulp-eslint": "4.0.0"
+		"eslint": "4.8.0"
 	}
 }
