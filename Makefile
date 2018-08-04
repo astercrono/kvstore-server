@@ -4,23 +4,28 @@ SHELL 			:= /bin/bash
 modules			:= ./node_modules
 data			:= ./data
 
-.PHONY: clean init build test
+.PHONY: clean destroy init build test
 
-all: init
-	@echo "building... this line is temporary"
+all: init build
 
 clean:
-	@echo "cleaning up installed modules"
+	@echo "Cleaning up installed modules"
 	@rm -rf node_modules
 
 destroy: clean
-	@echo "deleting data"
+	@echo "Deleting data"
 	@rm -rf data
 
 init:
 	@npm install
 	@mkdir -p data
 
-test: init
+build: init
+	@echo "Linting src"
+	@eslint src/ --ext .js
+	@echo "Linting test"
+	@eslint test/ --ext .js
+
+test: build
 	@mocha
 
