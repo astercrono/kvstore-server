@@ -11,15 +11,16 @@
 	"main": "./app.js",
 	"license": "MIT",
 	"dependencies": {
-		"async": "^2.5.0",
-		"body-parser": "1.18.2",
-		"express": "4.16.1",
-		"request": "^2.83.0",
-		"sqlite3": "3.1.13"
+		"async": "2.6.1",
+		"body-parser": "1.18.3",
+		"express": "4.16.3",
+		"request": "2.87.0",
+		"sqlite3": "4.0.2",
+		"ajv": "6.5.2",
+		"ajv-keywords": "3.2.0"
 	},
 	"devDependencies": {
-		"gulp": "3.9.1",
-		"mocha": "4.0.1",
-		"eslint": "4.8.0"
+		"mocha": "5.2.0",
+		"eslint": "5.2.0"
 	}
 }
