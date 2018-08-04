@@ -1,0 +1,17 @@
+{
+	"default": {
+		"databasePath": "${homeDirectory}/kvstore.db",
+		"encryptionSecretPath": "${homeDirectory}/kvstore.secret",
+		"signingSecretPath": "${homeDirectory}/kvstore-signing.secret"
+	},
+	"test": {
+		"databasePath": ":memory:",
+		"encryptionSecretPath": ":memory:",
+		"signingSecretPath": ":memory:"
+	},
+	"production": {
+		"databasePath": "${homeDirectory}/data/kvstore.db",
+		"encryptionSecretPath": "${homeDirectory}/data/kvstore.secret",
+		"signingSecretPath": "${homeDirectory}/data/kvstore-signing.secret"
+	}
+}
