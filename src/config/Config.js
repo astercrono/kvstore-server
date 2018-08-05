@@ -11,12 +11,16 @@ module.exports = exports = {
 		return configModel.databasePath;
 	},
 
-	encryptionSecretPath: () => {
-		return configModel.encryptionSecretPath;
+	secretPath: () => {
+		return configModel.secretPath;
 	},
 
-	signingSecretPath: () => {
-		return configModel.signingSecretPath;
+	encryptionKeyIterations: () => {
+		return configModel.encryptionKeyIterations;
+	},
+
+	apiKeyIterations: () => {
+		return configModel.apiKeyIterations;
 	}
 };
 

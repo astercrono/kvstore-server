@@ -8,8 +8,9 @@ const profileName = "test";
 describe("ConfigurationTest", () => {
 	it("Load Config", () => {
 		Config.load(configPath, profileName);
-		assert.equal(Config.signingSecretPath(), ":memory:");
 		assert.equal(Config.databasePath(), ":memory:");
-		assert.equal(Config.encryptionSecretPath(), ":memory:");
+		assert.equal(Config.secretPath(), ":memory:");
+		assert.equal(Config.encryptionKeyIterations(), 1000000);
+		assert.equal(Config.apiKeyIterations(), 1000000);
 	});
 });

@@ -1,17 +1,16 @@
 {
 	"default": {
 		"databasePath": "${homeDirectory}/kvstore.db",
-		"encryptionSecretPath": "${homeDirectory}/kvstore.secret",
-		"signingSecretPath": "${homeDirectory}/kvstore-signing.secret"
+		"secretPath": "${homeDirectory}/kvstore.secret",
+		"encryptionKeyIterations": 1000000,
+		"apiKeyIterations": 1000000
 	},
 	"test": {
 		"databasePath": ":memory:",
-		"encryptionSecretPath": ":memory:",
-		"signingSecretPath": ":memory:"
+		"secretPath": ":memory:"
 	},
 	"production": {
 		"databasePath": "${homeDirectory}/data/kvstore.db",
-		"encryptionSecretPath": "${homeDirectory}/data/kvstore.secret",
-		"signingSecretPath": "${homeDirectory}/data/kvstore-signing.secret"
+		"secretPath": "${homeDirectory}/data/kvstore.secret"
 	}
 }

@@ -4,12 +4,6 @@ const fs = require("fs");
 const defaultProfileName = "default";
 const homeDirectory = os.homedir();
 
-const ConfigName = {
-	DatabasePath: "databasePath",
-	EncryptionSecretPath: "encryptionSecretPath",
-	SigningSecretPath: "signingSecretPath"
-};
-
 const VariableName = {
 	HomeDirectory: {
 		name: "${homeDirectory}",
@@ -30,11 +24,11 @@ function processOverrides(fullModel, profileName) {
 	const defaultModel = fullModel[defaultProfileName];
 	const profileModel = fullModel[profileName];
 
-	Object.keys(ConfigName).forEach((configName) => {
-		const config = ConfigName[configName];
+	const configNames = Object.keys(defaultModel);
 
-		if (!profileModel.hasOwnProperty(config) && defaultModel.hasOwnProperty(config)) {
-			profileModel[config] = defaultModel[config];
+	configNames.forEach((name) => {
+		if (!profileModel.hasOwnProperty(name)) {
+			profileModel[name] = defaultModel[name];
 		}
 	});
 
@@ -58,7 +52,10 @@ function compileConfigValue(value) {
 }
 
 function containsVariable(value, variable) {
-	return value.indexOf(variable) >= 0;
+	if (isNaN(value)) {
+		return value.indexOf(variable) >= 0;
+	}
+	return value === variable;
 }
 
 function replaceVariable(value, variable, replacement) {
