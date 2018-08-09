@@ -2,8 +2,8 @@ const assert = require("assert");
 
 const Config = require("../src/config/Config");
 
-describe("Configuration Test", () => {
-	it("Load Config", () => {
+describe("Configuration Loading", () => {
+	it("Confirm Config", () => {
 		Config.load("test");
 		assert.equal(Config.databasePath(), ":memory:");
 		assert.equal(Config.secretPath(), ":memory:");

@@ -2,7 +2,7 @@ const assert = require("assert");
 const Config = require("../src/config/Config");
 const KeyStore = require("../src/crypt/KeyStore");
 
-describe("Key Loading Test", () => {
+describe("Key Loading and Storage", () => {
 	let keyStore = undefined;
 
 	before((done) => {
