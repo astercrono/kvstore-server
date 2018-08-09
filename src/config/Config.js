@@ -7,6 +7,10 @@ const configPath = path.join(__dirname, "/../../config.json");
 let configModel = undefined;
 let name = undefined;
 
+const encryptionKeyLength = 16;
+const signingKeyLength = 32;
+const apiKeyLength = 32;
+
 module.exports = exports = {
 	load: (profileName) => {
 		configModel = loader.load(configPath, profileName);
@@ -41,10 +45,22 @@ module.exports = exports = {
 		return configModel.aesMode;
 	},
 
+	encryptionKeyLength: () => {
+		return encryptionKeyLength;
+	},
+
+	signingKeyLength: () => {
+		return signingKeyLength;
+	},
+
+	apiKeyLength: () => {
+		return apiKeyLength;
+	},
+
 	encryptionKeyOptions: () => {
 		const options = KeyOptions();
 		options.iterations = configModel.encryptionKeyIterations;
-		options.keyLength = 16;
+		options.keyLength = encryptionKeyLength;
 		options.algorithm = "sha256";
 		options.saltLength = 8;
 		options.passwordLength = 8;
@@ -54,7 +70,7 @@ module.exports = exports = {
 	signingKeyOptions: () => {
 		const options = KeyOptions();
 		options.iterations = configModel.signingKeyIterations;
-		options.keyLength = 32;
+		options.keyLength = signingKeyLength;
 		options.algorithm = "sha256";
 		options.saltLength = 16;
 		options.passwordLength = 16;
@@ -64,7 +80,7 @@ module.exports = exports = {
 	apiKeyOptions: () => {
 		const options = KeyOptions();
 		options.iterations = configModel.apiKeyIterations;
-		options.keyLength = 32;
+		options.keyLength = apiKeyLength;
 		options.algorithm = "sha256";
 		options.saltLength = 16;
 		options.passwordLength = 16;

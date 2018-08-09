@@ -81,6 +81,13 @@ function KeyStore() {
 			return undefined;
 		},
 
+		getBuffer: (name) => {
+			if (keys) {
+				return keys.getBuffer(name);
+			}
+			return undefined;
+		},
+
 		keys: () => {
 			return keys;
 		},

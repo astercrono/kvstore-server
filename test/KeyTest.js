@@ -26,8 +26,11 @@ describe("Key Loading and Storage", () => {
 		assert.ok(keyStore);
 		assert.ok(keyStore.keys);
 		assert.ok(keyStore.get("encryption"));
+		assert.ok(keyStore.getBuffer("encryption").length === Config.encryptionKeyLength());
 		assert.ok(keyStore.get("signing"));
+		assert.ok(keyStore.getBuffer("signing").length === Config.signingKeyLength());
 		assert.ok(keyStore.get("api"));
+		assert.ok(keyStore.getBuffer("api").length === Config.apiKeyLength());
 		done();
 	});
 });
