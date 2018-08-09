@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 
 const KeyGenerationError = require("../error/KeyGenerationError");
+const KeyLengthTooLargeError = require("../error/KeyLengthTooLargeError");
 
 function KeyGenerator(options) {
 	let keyLength = options.keyLength;
@@ -11,25 +12,33 @@ function KeyGenerator(options) {
 
 	return {
 		generate: (callback) => {
-			generateRandomHexString(saltLength, (err, salt) => {
+			generateRandomBytes(saltLength, (err, saltBuffer) => {
 				if (err) {
 					callback(new KeyGenerationError(err));
 					return;
 				}
 
-				generateRandomHexString(passwordLength, (err, password) => {
+				generateRandomBytes(passwordLength, (err, passwordBuffer) => {
 					if (err) {
 						callback(new KeyGenerationError(err));
 						return;
 					}
 
-					crypto.pbkdf2(password, salt, iterations, keyLength, algorithm, (err, buffer) => {
+					crypto.pbkdf2(passwordBuffer, saltBuffer, iterations, keyLength, algorithm, (err, buff) => {
 						if (err) {
 							callback(new KeyGenerationError(err));
 							return;
 						}
 
-						callback(undefined, buffer.toString("hex"));
+						if (buff.length > keyLength) {
+							buff = cutBuffer(buff, keyLength);
+						}
+						else if (buff.length < keyLength) {
+							callback(new KeyLengthTooLargeError());
+							return;
+						}
+
+						callback(undefined, buff);
 					});
 				});
 			});
@@ -37,16 +46,18 @@ function KeyGenerator(options) {
 	};
 }
 
-function generateRandomHexString(length, callback) {
+function generateRandomBytes(length, callback) {
 	crypto.randomBytes(length, (err, buff) => {
 		if (err) {
 			callback(err);
 			return;
 		}
-
-		const value = buff.toString("hex");
-		callback(undefined, value);
+		callback(undefined, buff);
 	});
+}
+
+function cutBuffer(buff, length) {
+	return Buffer.from(buff.toString("hex").substring(0, length * 2), "hex");
 }
 
 module.exports = exports = KeyGenerator;

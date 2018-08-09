@@ -1,41 +1,76 @@
 const async = require("async");
 
-const config = require("../../config").get();
-
+const Config = require("../config/Config");
 const KeyStoreInitError = require("../error/KeyStoreInitError");
+const KeysInitializedError = require("../error/KeysInitializedError");
+const KeysUninitializedError = require("../error/KeysUninitializedError");
 const KeysReader = require("./KeysReader");
 const KeysWriter= require("./KeysWriter");
 const KeyGenerator = require("./KeyGenerator");
 const Keys = require("./Keys");
-const KeyOptions = require("./KeyOptions");
 
-const encryptionConfig = config.crypt.encryption;
-const signingConfig = config.crypt.signing;
-const apiConfig = config.crypt.api;
-
-let path = config.crypt.keystore.path;
+const MemoryPath = ":memory:";
 
 function KeyStore() {
+	const path = Config.secretPath();
 	let keys = undefined;
 
 	return {
-		init: (overwrite, callback) => {
-			KeysReader().read(path, (err, existingKeys) => {
-				if (err || overwrite) {
-					initNewKeys((err, newKeys) => {
-						if (err) {
-							callback(err);
-							return;
-						}
+		load: (callback) => {
+			if (path === MemoryPath) {
+				if (!keys) {
+					callback(undefined, new KeysUninitializedError());
+					return;
+				}
+				callback(undefined, keys);
+				return;
+			}
 
-						keys = newKeys;
-						callback(undefined, keys);
-					});
+			KeysReader().read(path, (err, readKeys) => {
+				if (err) {
+					callback(err);
 					return;
 				}
 
-				keys = existingKeys;
+				keys = readKeys;
 				callback(undefined, keys);
+			});
+		},
+
+		init: (callback) => {
+			if (keys) {
+				callback(KeysInitializedError());
+				return;
+			}
+
+			if (path === MemoryPath) {
+				initNewKeys(path, (err, newKeys) => {
+					if (err) {
+						callback(err);
+						return;
+					}
+
+					keys = newKeys;
+					callback(undefined, keys);
+				});
+				return;
+			}
+
+			KeysReader().read(path, (err, readKeys) => {
+				if (!err && readKeys) {
+					callback(KeysInitializedError(err));
+					return;
+				}
+
+				initNewKeys(path, (err, newKeys) => {
+					if (err) {
+						callback(err);
+						return;
+					}
+
+					keys = newKeys;
+					callback(undefined, keys);
+				});
 			});
 		},
 
@@ -46,25 +81,25 @@ function KeyStore() {
 			return undefined;
 		},
 
-		getKeys: () => {
+		keys: () => {
 			return keys;
 		},
 
 		equals: (otherStore) => {
-			if (!keys || !otherStore || !otherStore.getKeys()) {
+			if (!keys || !otherStore || !otherStore.keys()) {
 				return false;
 			}
-			return keys.equals(otherStore.getKeys());
+			return keys.equals(otherStore.keys());
 		}
 	};
 }
 
-function initNewKeys(callback) {
+function initNewKeys(path, callback) {
 	let keys = Keys();
 
 	async.parallel([
 		(asyncCallback) => {
-			initKey(path, encryptionConfig.iv, (err, key) => {
+			initKey(Config.encryptionKeyOptions(), (err, key) => {
 				if (err) {
 					asyncCallback(err);
 					return;
@@ -75,7 +110,7 @@ function initNewKeys(callback) {
 			});
 		},
 		(asyncCallback) => {
-			initKey(path, signingConfig, (err, key) => {
+			initKey(Config.signingKeyOptions(), (err, key) => {
 				if (err) {
 					asyncCallback(err);
 					return;
@@ -86,7 +121,7 @@ function initNewKeys(callback) {
 			});
 		},
 		(asyncCallback) => {
-			initKey(path, apiConfig, (err, key) => {
+			initKey(Config.apiKeyOptions(), (err, key) => {
 				if (err) {
 					asyncCallback(err);
 					return;
@@ -96,9 +131,14 @@ function initNewKeys(callback) {
 				asyncCallback();
 			});
 		}
-	], (err, results) => {
+	], (err) => {
 		if (err) {
 			callback(new KeyStoreInitError(err));
+			return;
+		}
+
+		if (path === MemoryPath) {
+			callback(undefined, keys);
 			return;
 		}
 
@@ -112,14 +152,14 @@ function initNewKeys(callback) {
 	});
 }
 
-function initKey(path, options, callback) {
-	KeyGenerator(KeyOptions(options)).generate((err, newKey) => {
+function initKey(options, callback) {
+	KeyGenerator(options).generate((err, newKey) => {
 		if (err) {
 			callback(err);
 			return;							
 		}
-		callback(undefined, newKey);
+		callback(undefined, newKey.toString("hex"));
 	});
 }
 
-module.exports = exporst = KeyStore;
+module.exports = exports = KeyStore;

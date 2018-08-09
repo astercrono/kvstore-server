@@ -1,5 +1,5 @@
 function Keys() {
-	const keys = {};
+	let keys = {};
 	let locked = false;
 
 	return {
@@ -11,6 +11,10 @@ function Keys() {
 
 		get: (name) => {
 			return keys[name];
+		},
+
+		getBuffer: (name) => {
+			return Buffer.from(keys[name], "hex");
 		},
 
 		lock: () => {

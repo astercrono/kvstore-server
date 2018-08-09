@@ -2,9 +2,9 @@ PATH  			:= $(PATH):node_modules/.bin
 SHELL 			:= /bin/bash
 
 modules			:= ./node_modules
-data			:= ./data
 src				:= ./src
 test			:= ./test
+app				:= ./app.js
 
 .PHONY: clean destroy init build test
 
@@ -15,12 +15,11 @@ clean:
 	@rm -rf $(modules)
 
 destroy: clean
-	@echo "Deleting data"
-	@rm -rf $(data)
+	@echo "Deleting data" #TODO - write node script to do this
+	@echo "Deleting keys" #TODO - write node script to do this
 
 init:
 	@npm install
-	@mkdir -p $(data)
 
 build: init
 	@echo "Linting src"
@@ -28,8 +27,14 @@ build: init
 	@echo "Linting test"
 	@eslint $(test)/ --ext .js
 
-run: $(modules)
-	@echo "running"
+data: build
+	@echo "Initializing data store" #TODO - write node script to do this
+
+keys: build
+	@echo "Initializing keys" #TODO - write node script to do this
+
+run: $(modules) $(app)
+	@echo "running" #TODO - run app.js
 
 test: build
 	@mocha
