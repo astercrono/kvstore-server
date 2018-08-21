@@ -1,4 +1,5 @@
 const async = require("async");
+const assert = require("assert");
 
 const Config = require("../config/Config");
 const KeyStoreInitError = require("../error/KeyStoreInitError");
@@ -16,6 +17,16 @@ function KeyStore() {
 	let keys = undefined;
 
 	return {
+		confirm: () => {
+			assert.ok(keys);
+			assert.ok(keys.get("encryption"));
+			assert.ok(keys.getBuffer("encryption").length === Config.encryptionKeyLength());
+			assert.ok(keys.get("signing"));
+			assert.ok(keys.getBuffer("signing").length === Config.signingKeyLength());
+			assert.ok(keys.get("api"));
+			assert.ok(keys.getBuffer("api").length === Config.apiKeyLength());
+		},
+
 		load: (callback) => {
 			if (path === MemoryPath) {
 				if (!keys) {
