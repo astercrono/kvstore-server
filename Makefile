@@ -7,7 +7,7 @@ test			:= ./test
 data_script     := ./script/data.js
 key_script      := ./script/keys.js
 
-.PHONY: clean destroy init build test
+.PHONY: clean init build new data keys test
 
 all: init build
 
@@ -23,6 +23,8 @@ build: init
 	@eslint $(src)/ --ext .js
 	@echo "Linting test"
 	@eslint $(test)/ --ext .js
+
+new: data keys
 
 data: build
 	@echo "Creating database"
