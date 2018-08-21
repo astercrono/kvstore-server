@@ -3,40 +3,42 @@ const KeysReadError = require("../error/KeysReadError");
 const Keys = require("./Keys");
 const fs = require("fs");
 
-function KeysReader() {
-	return {
-		read: (path, callback) => {
-			fs.readFile(path, "utf8", (err, json) => {
-				if (err) {
-					callback(new KeysReadError(err));
-					return;
-				}
+class KeysReader {
+	constructor(path) {
+		this.path = path;
+	}
 
-				let keyMap;
+	read(callback) {
+		fs.readFile(this.path, "utf8", (err, json) => {
+			if (err) {
+				callback(new KeysReadError(err));
+				return;
+			}
 
-				try {
-					keyMap = JSON.parse(json);
-				} catch (parseError) {
-					callback(new KeysFormatError(parseError));
-					return;
-				}
+			let keyMap;
 
-				if (!keyMap) {
-					callback(new KeysFormatError(parseError));
-					return;
-				}
+			try {
+				keyMap = JSON.parse(json);
+			} catch (parseError) {
+				callback(new KeysFormatError(parseError));
+				return;
+			}
 
-				const keys = Keys();
+			if (!keyMap) {
+				callback(new KeysFormatError(parseError));
+				return;
+			}
 
-				Object.keys(keyMap).forEach((k) => {
-					keys.set(k, keyMap[k]);
-				});
+			const keys = new Keys();
 
-				keys.lock();
-				callback(undefined, keys);
+			Object.keys(keyMap).forEach((k) => {
+				keys.set(k, keyMap[k]);
 			});
-		}
-	};
+
+			keys.lock();
+			callback(undefined, keys);
+		});
+	}
 }
 
 module.exports = exports = KeysReader;

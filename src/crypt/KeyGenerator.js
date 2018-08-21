@@ -3,61 +3,67 @@ const crypto = require("crypto");
 const KeyGenerationError = require("../error/KeyGenerationError");
 const KeyLengthTooLargeError = require("../error/KeyLengthTooLargeError");
 
-function KeyGenerator(options) {
-	let keyLength = options.keyLength;
-	let algorithm = options.algorithm;
-	let iterations = options.iterations;
-	let saltLength = options.saltLength;
-	let passwordLength = options.passwordLength;
+class KeyGenerator {
+	constructor(options) {
+		this.keyLength = options.keyLength;
+		this.algorithm = options.algorithm;
+		this.iterations = options.iterations;
+		this.saltLength = options.saltLength;
+		this.passwordLength = options.passwordLength;
+	}
 
-	return {
-		generate: (callback) => {
-			generateRandomBytes(saltLength, (err, saltBuffer) => {
+	generate(callback) {
+		let saltLength = this.saltLength;
+		let passwordLength = this.passwordLength;
+		let iterations = this.iterations;
+		let keyLength = this.keyLength;
+		let algorithm = this.algorithm;
+
+		this._generateRandomBytes(saltLength, (err, saltBuffer) => {
+			if (err) {
+				callback(new KeyGenerationError(err));
+				return;
+			}
+
+			this._generateRandomBytes(passwordLength, (err, passwordBuffer) => {
 				if (err) {
 					callback(new KeyGenerationError(err));
 					return;
 				}
 
-				generateRandomBytes(passwordLength, (err, passwordBuffer) => {
+				crypto.pbkdf2(passwordBuffer, saltBuffer, iterations, keyLength, algorithm, (err, buff) => {
 					if (err) {
 						callback(new KeyGenerationError(err));
 						return;
 					}
 
-					crypto.pbkdf2(passwordBuffer, saltBuffer, iterations, keyLength, algorithm, (err, buff) => {
-						if (err) {
-							callback(new KeyGenerationError(err));
-							return;
-						}
+					if (buff.length > keyLength) {
+						buff = this._cutBuffer(buff, keyLength);
+					}
+					else if (buff.length < keyLength) {
+						callback(new KeyLengthTooLargeError());
+						return;
+					}
 
-						if (buff.length > keyLength) {
-							buff = cutBuffer(buff, keyLength);
-						}
-						else if (buff.length < keyLength) {
-							callback(new KeyLengthTooLargeError());
-							return;
-						}
-
-						callback(undefined, buff);
-					});
+					callback(undefined, buff);
 				});
 			});
-		}
-	};
-}
+		});
+	}
 
-function generateRandomBytes(length, callback) {
-	crypto.randomBytes(length, (err, buff) => {
-		if (err) {
-			callback(err);
-			return;
-		}
-		callback(undefined, buff);
-	});
-}
+	_generateRandomBytes(length, callback) {
+		crypto.randomBytes(length, (err, buff) => {
+			if (err) {
+				callback(err);
+				return;
+			}
+			callback(undefined, buff);
+		});
+	}
 
-function cutBuffer(buff, length) {
-	return Buffer.from(buff.toString("hex").substring(0, length * 2), "hex");
+	_cutBuffer(buff, length) {
+		return Buffer.from(buff.toString("hex").substring(0, length * 2), "hex");
+	}
 }
 
 module.exports = exports = KeyGenerator;

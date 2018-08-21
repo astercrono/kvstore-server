@@ -3,88 +3,86 @@ const loader = require("./ConfigLoader");
 const KeyOptions = require("../crypt/KeyOptions");
 
 const configPath = path.join(__dirname, "/../../config.json");
-
-let configModel = undefined;
-let name = undefined;
-
 const encryptionKeyLength = 16;
 const signingKeyLength = 32;
 const apiKeyLength = 32;
 
-module.exports = exports = {
-	load: (profileName) => {
-		configModel = loader.load(configPath, profileName);
-		name = profileName;
-	},
+class Config {
+	constructor() {
+		this.configModel = undefined;
+		this.name = undefined;
+	}
 
-	name: () => {
-		return name;
-	},
-
-	databasePath: () => {
-		return configModel.databasePath;
-	},
-
-	secretPath: () => {
-		return configModel.secretPath;
-	},
-
-	encryptionKeyIterations: () => {
-		return configModel.encryptionKeyIterations;
-	},
-
-	signingKeyIterations: () => {
-		return configModel.signingKeyIterations;
-	},
-
-	apiKeyIterations: () => {
-		return configModel.apiKeyIterations;
-	},
-
-	aesMode: () => {
-		return configModel.aesMode;
-	},
-
-	encryptionKeyLength: () => {
+	encryptionKeyLength() {
 		return encryptionKeyLength;
-	},
+	}
 
-	signingKeyLength: () => {
+	signingKeyLength() {
 		return signingKeyLength;
-	},
+	}
 
-	apiKeyLength: () => {
+	apiKeyLength() {
 		return apiKeyLength;
-	},
+	}
 
-	encryptionKeyOptions: () => {
-		const options = KeyOptions();
-		options.iterations = configModel.encryptionKeyIterations;
-		options.keyLength = encryptionKeyLength;
+	load(profileName) {
+		this.configModel = loader.load(configPath, profileName);
+		this.name = profileName;
+	}
+
+	databasePath() {
+		return this.configModel.databasePath;
+	}
+
+	secretPath() {
+		return this.configModel.secretPath;
+	}
+
+	encryptionKeyIterations() {
+		return this.configModel.encryptionKeyIterations;
+	}
+
+	signingKeyIterations() {
+		return this.configModel.signingKeyIterations;
+	}
+
+	apiKeyIterations() {
+		return this.configModel.apiKeyIterations;
+	}
+
+	aesMode() {
+		return this.configModel.aesMode;
+	}
+
+	encryptionKeyOptions() {
+		const options = new KeyOptions();
+		options.iterations = this.configModel.encryptionKeyIterations;
+		options.keyLength = this.encryptionKeyLength();
 		options.algorithm = "sha256";
 		options.saltLength = 8;
 		options.passwordLength = 8;
 		return options;
-	},
+	}
 
-	signingKeyOptions: () => {
-		const options = KeyOptions();
-		options.iterations = configModel.signingKeyIterations;
-		options.keyLength = signingKeyLength;
-		options.algorithm = "sha256";
-		options.saltLength = 16;
-		options.passwordLength = 16;
-		return options;
-	},
-
-	apiKeyOptions: () => {
-		const options = KeyOptions();
-		options.iterations = configModel.apiKeyIterations;
-		options.keyLength = apiKeyLength;
+	signingKeyOptions() {
+		const options = new KeyOptions();
+		options.iterations = this.configModel.signingKeyIterations;
+		options.keyLength = this.signingKeyLength();
 		options.algorithm = "sha256";
 		options.saltLength = 16;
 		options.passwordLength = 16;
 		return options;
 	}
-};
 
+	apiKeyOptions() {
+		const options = new KeyOptions();
+		options.iterations = this.configModel.apiKeyIterations;
+		options.keyLength = this.apiKeyLength();
+		options.algorithm = "sha256";
+		options.saltLength = 16;
+		options.passwordLength = 16;
+		return options;
+	}
+}
+
+module.exports = exports = new Config();

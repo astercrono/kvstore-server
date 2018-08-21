@@ -1,10 +1,10 @@
-const KeyOptions = () => {
-	return {
-		keyLength: 64,
-		algorithm: "sha256",
-		iterations: 1000000,
-		saltLength: 32,
-		passwordLength: 32
+class KeyOptions {
+	constructor() {
+		this.keyLength = 64;
+		this.algorithm = "sha256";
+		this.iterations = 1000000;
+		this.saltLength = 32;
+		this.passwordLength = 32;
 	};
 };
 

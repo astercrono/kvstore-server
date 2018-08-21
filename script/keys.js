@@ -13,8 +13,7 @@ Config.load(profile);
 
 console.log("Creating keys at " + Config.secretPath());
 const KeyStore = require("../src/crypt/KeyStore");
-keyStore = KeyStore();
-keyStore.init((err, keys) => {
+KeyStore.init(Config.secretPath(), (err, keys) => {
 	if (err) {
 		console.log("Error creating keys.");
 		console.log(err);
@@ -22,5 +21,5 @@ keyStore.init((err, keys) => {
 	}
 
 	assert.ok(keys);
-	keyStore.confirm();
+	KeyStore.confirm();
 });

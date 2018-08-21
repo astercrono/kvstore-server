@@ -3,17 +3,15 @@ const Config = require("../src/config/Config");
 const KeyStore = require("../src/crypt/KeyStore");
 
 describe("Key Loading and Storage", () => {
-	let keyStore = undefined;
-
 	before((done) => {
 		Config.load("test");
-		keyStore = KeyStore();
+		assert.ok(KeyStore);
 
-		keyStore.init((err, keys) => {
+		KeyStore.init(Config.secretPath(), (err, keys) => {
 			assert.ok(!err);
 			assert.ok(keys);
 
-			keyStore.load((err, keys) => {
+			KeyStore.load(Config.secretPath(), (err, keys) => {
 				assert.ok(!err);
 				assert.ok(keys);
 
@@ -23,8 +21,7 @@ describe("Key Loading and Storage", () => {
 	});
 
 	it("Check Keys", (done) => {
-		assert.ok(keyStore);
-		keyStore.confirm();
+		KeyStore.confirm();
 		done();
 	});
 });
