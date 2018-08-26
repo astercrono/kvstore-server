@@ -1,18 +1,21 @@
-function KeyValue(key, value) {
-	const model = {
-		"key": null,
-		"value": value
-	};
+const keyValueDelimeter = "$__$";
 
-	if (key) {
-		model.key = key;
+class KeyValue {
+	constructor(key, value) {
+		this.key = key;
+		this.value = value;
 	}
 
-	if (value) {
-		model.value = value;
+	encode() {
+		return this.key + keyValueDelimeter + this.value;
 	}
 
-	return model;
+	static decode(encodedString) {
+		const index = encodedString.indexOf(keyValueDelimeter);
+		const key = encodedString.substring(0, index);
+		const value = encodedString.substring(index + 1, encodedString.length);
+		return new KeyValue(key, value);
+	}
 }
 
 module.exports = exports = KeyValue;

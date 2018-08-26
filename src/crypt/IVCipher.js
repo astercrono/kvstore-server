@@ -7,22 +7,13 @@ class IVCipher {
 	}
 
 	encode() {
-		return this._addIVToCipherText(this.cipherText, this.iv);
+		return this.iv + ivKeyDelimiter + this.cipherText;
 	}
 
-	_addIVToCipherText(cipherText, iv) {
-		return iv + ivKeyDelimiter + cipherText;
-	}
-
-	static decode(encoded) {
-		return this._separateIVFromCipherText(encoded);
-	}
-
-	static _separateIVFromCipherText(fullCipherText) {
-		const index = fullCipherText.indexOf(ivKeyDelimiter);
-		const iv = fullCipherText.substring(0, index);
-		const cipherText = fullCipherText.substring(index + 1, fullCipherText.length);
-
+	static decode(encodedString) {
+		const index = encodedString.indexOf(ivKeyDelimiter);
+		const iv = encodedString.substring(0, index);
+		const cipherText = encodedString.substring(index + 1, encodedString.length);
 		return new IVCipher(cipherText, iv);
 	}
 }

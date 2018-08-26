@@ -5,16 +5,23 @@ const crypto = require("crypto");
 const IVCipher = require("./IVCipher");
 const KeyStore = require("./KeyStore");
 const KeyGenerator = require("./KeyGenerator");
+const KVSigner = require("./KVSigner");
 
-const encryptionIVOptions = Config.encryptionIVOptions();
-const ivGenerator = new KeyGenerator(encryptionIVOptions);
 let instance = undefined;
 
 class KVCrypt {
+	constructor() {
+		this.ivGenerator = new KeyGenerator(Config.encryptionIVOptions());
+
+		const signingKey = KeyStore.get("signing");
+		const signingOptions = Config.signingKeyOptions();
+		this.signer = new KVSigner(signingKey, signingOptions);
+	}
+
 	encrypt(plaintext, callback) {
 		const encryptionKey = KeyStore.getBuffer("encryption");
 
-		ivGenerator.generate((err, iv) => {
+		this._generateIV((err, iv) => {
 			if (err) {
 				callback(err);
 				return;
@@ -40,6 +47,18 @@ class KVCrypt {
 		plaintext += decipher.final("utf8");
 
 		callback(undefined, plaintext);
+	}
+
+	sign(value) {
+		return this.signer.sign(value);
+	}
+
+	confirm(actual, expected) {
+		return this.signer.confirm(actual, expected);
+	}
+
+	_generateIV(callback) {
+		return this.ivGenerator.generate(callback);
 	}
 }
 

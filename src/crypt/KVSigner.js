@@ -1,33 +1,32 @@
 const crypto = require("crypto");
 
 class KVSigner {
-	constructor(key, options) {
-		this.key = key;
+	constructor(signingKey, options) {
+		this.signingKey= signingKey;
 		this.options = options;
 	}
 
-	sign(value) {
-		return this._hmac(value);
-	}
-
-	confirm(actual, expected) {
-		if (!actual || !expected) {
-			return false;
-		}
-
-		const signature = this._hmac(actual);
-		if (!signature) {
-			return false;
-		}
-		return signature === expected;
-	}
-
-	_hmac(value) {
-		const hmac = crypto.createHmac(options.algorithm, this.key);
-		hmac.update(this.key);
-		hmac.update(value);
-
+	sign(encryptedKeyValue) {
+		const hmac = crypto.createHmac(this.options.algorithm, this.signingKey);
+		hmac.update(encryptedKeyValue.encode());
 		return hmac.digest("hex");
+	}
+
+	confirm(actualEncryptedKeyValue, expectedEncryptedKeyValue) {
+		if (!actualEncryptedKeyValue || !expectedEncryptedKeyValue) {
+			return false;
+		}
+
+		const expectedSignature = this.sign(expectedEncryptedKeyValue);
+		if (!expectedSignature) {
+			return false;
+		}
+		const actualSignature = this.sign(actualEncryptedKeyValue);
+		if (!actualSignature) {
+			return false;
+		}
+
+		return actualSignature === expectedSignature;
 	}
 }
 
