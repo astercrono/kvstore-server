@@ -1,55 +1,18 @@
-const config = require("../../config").get();
+const Config = require("../config/Config");
 
 const crypto = require("crypto");
-const async = require("async");
 
+const IVCipher = require("./IVCipher");
 const KeyStore = require("./KeyStore");
-const KeyOptions = require("./KeyOptions");
 const KeyGenerator = require("./KeyGenerator");
-const KVSigner = require("./KVSigner");
-const KeysInitializedError = require("../error/KeysInitializedError");
-const EncryptionError = require("../error/EncryptionError");
-const DecryptionError = require("../error/DecryptionError");
 
-const encryptionConfig = config.crypt.encryption;
-const signingConfig = config.crypt.signing;
-const apiConfig = config.crypt.api;
+const encryptionIVOptions = Config.encryptionIVOptions();
+const ivGenerator = new KeyGenerator(encryptionIVOptions);
+let instance = undefined;
 
-const ivConfig = encryptionConfig.iv;
-ivConfig.saltLength = 16;
-ivConfig.passwordLength = 16;
-
-const ivGenerator = KeyGenerator(KeyOptions(ivConfig));
-
-let keyStore = undefined;
-let kvSigner = undefined;
-
-const KVCrypt = {
-	initKeys: (overwrite, callback) => {
-		if (keyStore && !overwrite) {
-			callback();
-			return;
-		}
-
-		keyStore = KeyStore();
-		keyStore.init(overwrite, (err, keys) => {
-			if (err) {
-				keyStore = undefined;
-				kvSigner = undefined;
-
-				callback(err);
-				return;
-			}
-
-			kvSigner = KVSigner(keyStore.get("signing"));
-
-			callback();
-		});
-	},
-
-	encrypt: (plaintext, callback) => {
-		const algorithm = encryptionConfig.algorithm;
-		const encryptionKey = keyStore.get("encryption");
+class KVCrypt {
+	encrypt(plaintext, callback) {
+		const encryptionKey = KeyStore.getBuffer("encryption");
 
 		ivGenerator.generate((err, iv) => {
 			if (err) {
@@ -58,66 +21,33 @@ const KVCrypt = {
 			}
 
 			const ivBuffer = Buffer.from(iv, "hex");
-			const cipher = crypto.createCipheriv(algorithm, encryptionKey, ivBuffer);
-			cipher.update(plaintext, "utf8");
+			const cipher = crypto.createCipheriv(Config.aesMode(), encryptionKey, ivBuffer);
 
-			const cipherText = cipher.final("hex");
-			const ivString = ivBuffer.toString("hex");
-			const fullCipherText = addIVToCipherText(cipherText, ivString);
+			let cipherText = cipher.update(plaintext, "utf8", "hex");
+			cipherText += cipher.final("hex");
 
-			callback(undefined, fullCipherText);
+			callback(undefined, new IVCipher(cipherText, iv));
 		});
-	},
-
-	decrypt: (cipherText, callback) => {
-		const algorithm = encryptionConfig.algorithm;
-		const encryptionKey = keyStore.get("encryption");
-
-		const secret = separateIVFromCipherText(cipherText);
-		const ivBuffer = Buffer.from(secret.iv, "hex");
-		const splitCipherText = secret.cipherText;
-
-		const decipher = crypto.createDecipheriv(algorithm, encryptionKey, ivBuffer);
-		decipher.update(splitCipherText, "hex");
-	
-		const plaintext = decipher.final("utf8");
-		callback(undefined, plaintext);
-	},
-
-	signKV: (key, value) => {
-		return kvSigner.sign(key, value);
-	},
-
-	confirmKVSignature: (key, value, expectedSignature) => {
-		return kvSigner.confirm(key, value, expectedSignature);
-	},
-
-	confirmApiKey: (token) => {
-		return token && token === keyStore.get("api");
-	},
-
-	getKey: (name) => {
-		return keyStore.get(name);
-	},
-
-	getKeyStore: () => {
-		return keyStore;
 	}
-};
 
-function addIVToCipherText(cipherText, iv) {
-	return iv + encryptionConfig.keyDelimiter + cipherText;
+	decrypt(ivCipher, callback) {
+		const encryptionKey = KeyStore.getBuffer("encryption");
+
+		const ivBuffer = Buffer.from(ivCipher.iv, "hex");
+		const decipher = crypto.createDecipheriv(Config.aesMode(), encryptionKey, ivBuffer);
+
+		let plaintext = decipher.update(ivCipher.cipherText, "hex", "utf8");
+		plaintext += decipher.final("utf8");
+
+		callback(undefined, plaintext);
+	}
 }
 
-function separateIVFromCipherText(fullCipherText) {
-	const index = fullCipherText.indexOf(encryptionConfig.keyDelimiter);
-	const iv = fullCipherText.substring(0, index);
-	const cipherText = fullCipherText.substring(index + 1, fullCipherText.length);
-
-	return {
-		"iv": iv,
-		"cipherText": cipherText
-	};
+function getInstance() {
+	if (!instance) {
+		instance = new KVCrypt();
+	}
+	return instance;
 }
 
-module.exports = exports = KVCrypt;
+module.exports = exports = getInstance;

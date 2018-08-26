@@ -58,7 +58,7 @@ class KeyStore {
 		this.path = path;
 
 		if (this.keys) {
-			callback(KeysInitializedError());
+			callback(new KeysInitializedError());
 			return;
 		}
 
@@ -77,7 +77,7 @@ class KeyStore {
 
 		new KeysReader(this.path).read((err, readKeys) => {
 			if (!err && readKeys) {
-				callback(KeysInitializedError(err));
+				callback(new KeysInitializedError(err));
 				return;
 			}
 
@@ -91,6 +91,11 @@ class KeyStore {
 				callback(undefined, this.keys);
 			});
 		});
+	}
+
+	reinit(path, callback) {
+		this.keys = undefined;
+		this.init(path, callback);
 	}
 
 	get(name) {
@@ -178,7 +183,7 @@ class KeyStore {
 				callback(err);
 				return;
 			}
-			callback(undefined, newKey.toString("hex"));
+			callback(undefined, newKey);
 		});
 	}
 }

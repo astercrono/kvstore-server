@@ -4,8 +4,14 @@ const KeyOptions = require("../crypt/KeyOptions");
 
 const configPath = path.join(__dirname, "/../../config.json");
 const encryptionKeyLength = 16;
+const encryptionKeyIterations = 1000000;
+const encryptionIVLength = 16;
+const encryptionIVIterations = 1000000;
 const signingKeyLength = 32;
+const signingKeyIterations = 1000000;
 const apiKeyLength = 32;
+const apiKeyIterations = 1000000;
+const aesMode = "aes-128-ctr";
 
 class Config {
 	constructor() {
@@ -16,6 +22,11 @@ class Config {
 	encryptionKeyLength() {
 		return encryptionKeyLength;
 	}
+
+	encryptionIVLength() {
+		return encryptionIVLength;
+	}
+
 
 	signingKeyLength() {
 		return signingKeyLength;
@@ -39,25 +50,39 @@ class Config {
 	}
 
 	encryptionKeyIterations() {
-		return this.configModel.encryptionKeyIterations;
+		return encryptionKeyIterations;
+	}
+
+	encryptionIVIterations() {
+		return encryptionIVIterations;
 	}
 
 	signingKeyIterations() {
-		return this.configModel.signingKeyIterations;
+		return signingKeyIterations;
 	}
 
 	apiKeyIterations() {
-		return this.configModel.apiKeyIterations;
+		return apiKeyIterations;
 	}
 
 	aesMode() {
-		return this.configModel.aesMode;
+		return aesMode;
 	}
 
 	encryptionKeyOptions() {
 		const options = new KeyOptions();
-		options.iterations = this.configModel.encryptionKeyIterations;
+		options.iterations = this.encryptionKeyIterations();
 		options.keyLength = this.encryptionKeyLength();
+		options.algorithm = "sha256";
+		options.saltLength = 8;
+		options.passwordLength = 8;
+		return options;
+	}
+
+	encryptionIVOptions() {
+		const options = new KeyOptions();
+		options.iterations = this.encryptionIVIterations();
+		options.keyLength = this.encryptionIVLength();
 		options.algorithm = "sha256";
 		options.saltLength = 8;
 		options.passwordLength = 8;
@@ -66,7 +91,7 @@ class Config {
 
 	signingKeyOptions() {
 		const options = new KeyOptions();
-		options.iterations = this.configModel.signingKeyIterations;
+		options.iterations = this.signingKeyIterations();
 		options.keyLength = this.signingKeyLength();
 		options.algorithm = "sha256";
 		options.saltLength = 16;
@@ -76,7 +101,7 @@ class Config {
 
 	apiKeyOptions() {
 		const options = new KeyOptions();
-		options.iterations = this.configModel.apiKeyIterations;
+		options.iterations = this.apiKeyIterations();
 		options.keyLength = this.apiKeyLength();
 		options.algorithm = "sha256";
 		options.saltLength = 16;

@@ -9,7 +9,7 @@ key_script      := ./script/keys.js
 
 .PHONY: clean init build new data keys test
 
-all: init build
+all: init build test
 
 clean:
 	@echo "Cleaning up installed modules"

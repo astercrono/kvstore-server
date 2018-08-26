@@ -1,11 +1,7 @@
 {
 	"default": {
 		"databasePath": "${homeDirectory}/kvstore.db",
-		"secretPath": "${homeDirectory}/kvstore.secret",
-		"encryptionKeyIterations": 1000000,
-		"signingKeyIterations": 1000000,
-		"apiKeyIterations": 1000000,
-		"aesMode": "aes-128-ctr"
+		"secretPath": "${homeDirectory}/kvstore.secret"
 	},
 	"test": {
 		"databasePath": ":memory:",

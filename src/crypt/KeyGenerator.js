@@ -45,7 +45,7 @@ class KeyGenerator {
 						return;
 					}
 
-					callback(undefined, buff);
+					callback(undefined, buff.toString("hex"));
 				});
 			});
 		});
