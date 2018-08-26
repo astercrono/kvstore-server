@@ -49,12 +49,16 @@ class KVCrypt {
 		callback(undefined, plaintext);
 	}
 
-	sign(value) {
-		return this.signer.sign(value);
+	signKeyValue(encryptedKeyValue) {
+		return this.signer.sign(encryptedKeyValue);
 	}
 
-	confirm(actual, expected) {
+	confirmSignature(actual, expected) {
 		return this.signer.confirm(actual, expected);
+	}
+
+	confirmApiKey(actualKey) {
+		return actualKey && actualKey === KeyStore.get("api");
 	}
 
 	_generateIV(callback) {
