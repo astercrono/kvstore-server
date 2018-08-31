@@ -1,4 +1,4 @@
-const KVDao = require("../dataaccess/KVDao");
+const KVDao = require("../dataaccess/KVDao2");
 const KVCrypt = require("../crypt/KVCrypt");
 const KVRebuildError = require("../error/KVRebuildError");
 
