@@ -1,5 +1,6 @@
 const assert = require("assert");
 const ComponentLoader = require("../src/component/ComponentLoader");
+const Component = require("../src/component/Component");
 
 class TestLoader extends ComponentLoader {
 	load() {
@@ -26,6 +27,13 @@ describe("Component Test", () => {
 		assert.ok(component);
 		assert.equal(component.foo, 1);
 		assert.equal(component.bar(), 2);
+
+		try {
+			ComponentStore.add(new Component("TestComponent", {}));
+		}
+		catch(error) {
+			assert.ok(error);
+		}
 
 		done();
 	});
