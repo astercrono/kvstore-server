@@ -1,4 +1,4 @@
-const Initializer = require("../Initializer")
+const Initializer = require("../Initializer");
 
 module.exports = exports = {
 	initialize: () => {
