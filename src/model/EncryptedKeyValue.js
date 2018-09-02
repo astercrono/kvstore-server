@@ -2,8 +2,8 @@ const KeyValue = require("./KeyValue");
 const IVCipher = require("../crypt/IVCipher");
 
 class EncryptedKeyValue extends KeyValue {
-	constructor(key, ivCipher) {
-		super(key, ivCipher.encode());
+	constructor(key, ivCipher, signature) {
+		super(key, ivCipher.encode(), signature);
 	}
 
 	encode() {

@@ -1,11 +1,9 @@
-function DecryptionError(cause) {
-	this.name = "DecryptionError";
-	this.message = "Error decrypting.";
+const ExtendableError = require("../error/ExtendableError");
 
-	if (cause) {
-		this.message += "\n" + cause.stack;
+class DecryptionError extends ExtendableError {
+	constructor(key) {
+		super("Error decrypting value for key=" + key);
 	}
 }
-DecryptionError.prototype = Object.create(Error); 
 
 module.exports = exports = DecryptionError;

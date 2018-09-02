@@ -6,6 +6,10 @@ class ComponentStore {
 	}
 
 	load() {
+		if (Object.isFrozen(this._data)) {
+			return;
+		}
+
 		const loaders = require("./load");
 		loaders.forEach((L) => {
 			const loader = new L();

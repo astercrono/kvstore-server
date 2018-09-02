@@ -1,6 +1,8 @@
 const assert = require("assert");
+const KVTestHelper = require("./KVTestHelper");
 const ComponentLoader = require("../src/component/ComponentLoader");
 const Component = require("../src/component/Component");
+const ComponentStore = require("../src/component/ComponentStore");
 
 class TestLoader extends ComponentLoader {
 	load() {
@@ -13,14 +15,12 @@ class TestLoader extends ComponentLoader {
 }
 
 describe("Component Test", () => {
-	before((done) => {
-		let loaders = require("../src/component/load");
-		loaders.push(TestLoader);
-		done();
-	});
+	before(KVTestHelper.initialize(false));
 
 	it("Loading Component Store", (done) => {
-		const ComponentStore = require("../src/component/ComponentStore");
+		let loaders = require("../src/component/load");
+		loaders.push(TestLoader);
+
 		ComponentStore.load();
 
 		const component = ComponentStore.get("TestComponent");

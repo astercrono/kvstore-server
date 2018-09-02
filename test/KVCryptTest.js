@@ -1,27 +1,12 @@
 const assert = require("assert");
-const Config = require("../src/config/Config");
 const KeyStore = require("../src/crypt/KeyStore");
+const KVTestHelper = require("./KVTestHelper");
 const KVCrypt = require("../src/crypt/KVCrypt");
 const EncryptedKeyValue = require("../src/model/EncryptedKeyValue");
 const IVCipher = require("../src/crypt/IVCipher");
 
 describe("KVCrypt", () => {
-	before((done) => {
-		Config.load("test");
-		assert.ok(KeyStore);
-
-		KeyStore.reinit(Config.secretPath(), (err, keys) => {
-			assert.ok(!err);
-			assert.ok(keys);
-
-			KeyStore.load(Config.secretPath(), (err, keys) => {
-				assert.ok(!err);
-				assert.ok(keys);
-
-				done();
-			});
-		});
-	});
+	before(KVTestHelper.initialize(false));
 
 	it("Encryption / Decryption", (done) => {
 		const plaintext = "Contrary to popular belief, Lorem Ipsum is not simply random text. ";

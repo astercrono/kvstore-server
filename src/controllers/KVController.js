@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const AuthenticationInterceptor = require("./AuthenticationInterceptor");
 
 const ResponseSender = require("./ResponseSender");
-const KVService = require("../services/KVService");
+const KVService = require("../services/KVService2");
 
 const jsonParser = bodyParser.json();
 const authInterceptor = AuthenticationInterceptor();

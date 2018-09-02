@@ -1,11 +1,9 @@
-function EncryptionError(cause) {
-	this.name = "EncryptionError";
-	this.message = "Error encrypting.";
+const ExtendableError = require("../error/ExtendableError");
 
-	if (cause) {
-		this.message += "\n" + cause.stack;
+class EncryptionError extends ExtendableError {
+	constructor(key) {
+		super("Error encrypting value for key=" + key);
 	}
 }
-EncryptionError.prototype = Object.create(Error); 
 
 module.exports = exports = EncryptionError;

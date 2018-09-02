@@ -1,11 +1,10 @@
-function KVSignatureError(cause) {
-	this.name = "KVSignatureError";
-	this.message = "Error confirming signature of key-value.";
+const ExtendableError = require("./ExtendableError");
 
-	if (cause) {
-		this.message += "\n" + cause.stack;
+class KVSignatureError extends ExtendableError {
+	constructor(key) {
+		super("Error confirming signature of value for key=" + key);
 	}
-}
-KVSignatureError.prototype = Object.create(Error); 
+};
 
 module.exports = exports = KVSignatureError;
+

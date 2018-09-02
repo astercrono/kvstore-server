@@ -1,9 +1,10 @@
 const keyValueDelimeter = "$__$";
 
 class KeyValue {
-	constructor(key, value) {
+	constructor(key, value, signature) {
 		this.key = key;
 		this.value = value;
+		this.signature = signature;
 	}
 
 	encode() {
