@@ -81,6 +81,17 @@ class SqliteKVDao extends KVDao {
 			callback();
 		});
 	}
+
+
+	run(sql, params, callback) {
+		this.db.run(sql, params, (err) => {
+			if (err) {
+				callback(err);
+				return;
+			}
+			callback();
+		});
+	}
 }
 
 module.exports = exports = SqliteKVDao;

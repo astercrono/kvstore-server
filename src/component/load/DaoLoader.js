@@ -1,3 +1,4 @@
+const fs = require("fs");
 const ComponentLoader = require("../ComponentLoader");
 const Config = require("../../config/Config");
 const SqliteKVDao = require("../../dataaccess/SqliteKVDao");

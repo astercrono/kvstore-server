@@ -9,3 +9,5 @@ class KVService {
 	getKeys(callback) { };
 	deleteValue(key, callback) { };
 }
+
+module.exports = exports = KVService;
