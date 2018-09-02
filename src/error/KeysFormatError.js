@@ -1,11 +1,9 @@
-function KeysFormatError(cause) {
-	this.name = "KeysFormatError";
-	this.message = "Invalid Key Store format.";
+const ExtendableError = require("./ExtendableError");
 
-	if (cause) {
-		this.message += "\n" + cause.stack;
+class KeysFormatError extends ExtendableError {
+	constructor(error) {
+		super("Invalid Key Store format.", error);
 	}
 }
-KeysFormatError.prototype = Object.create(Error);
 
 module.exports = exports = KeysFormatError;

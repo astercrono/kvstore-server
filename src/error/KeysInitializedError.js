@@ -1,11 +1,9 @@
-function KeysInitializedError(cause) {
-	this.name = "KeysInitializedError";
-	this.message = "Keys already initialized.";
+const ExtendableError = require("./ExtendableError");
 
-	if (cause) {
-		this.message += "\n" + cause.stack;
+class KeysInitializedError extends ExtendableError {
+	constructor(error) {
+		super("Keys already initialized.", error);
 	}
 }
-KeysInitializedError.prototype = Object.create(Error); 
 
 module.exports = exports = KeysInitializedError;

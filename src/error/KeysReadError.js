@@ -1,11 +1,9 @@
-function KeysReadError(cause) {
-	this.name = "KeysReadError";
-	this.message = "Unable to read Key Store.";
+const ExtendableError = require("./ExtendableError");
 
-	if (cause) {
-		this.message += "\n" + cause.stack;
+class KeysReadError extends ExtendableError {
+	constructor(error) {
+		super("Unable to read Key Store", error);
 	}
 };
-KeysReadError.prototype = Object.create(Error);
 
 module.exports = exports = KeysReadError;

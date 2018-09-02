@@ -1,8 +1,8 @@
-const KVTestHelper = require("./KVTestHelper");
+const KVTestHelper = require("../src/test/KVTestHelper");
 const KeyStore = require("../src/crypt/KeyStore");
 
 describe("Key Store", () => {
-	before(KVTestHelper.initialize(false));
+	before(KVTestHelper.initialize());
 
 	it("Load and Store Keys", (done) => {
 		KeyStore.confirm();

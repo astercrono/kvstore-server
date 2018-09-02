@@ -5,6 +5,7 @@ const KeyLengthTooLargeError = require("../error/KeyLengthTooLargeError");
 
 class KeyGenerator {
 	constructor(options) {
+		this.keyName = options.name;
 		this.keyLength = options.keyLength;
 		this.algorithm = options.algorithm;
 		this.iterations = options.iterations;
@@ -21,19 +22,19 @@ class KeyGenerator {
 
 		this._generateRandomBytes(saltLength, (err, saltBuffer) => {
 			if (err) {
-				callback(new KeyGenerationError(err));
+				callback(new KeyGenerationError(this.keyName, err));
 				return;
 			}
 
 			this._generateRandomBytes(passwordLength, (err, passwordBuffer) => {
 				if (err) {
-					callback(new KeyGenerationError(err));
+					callback(new KeyGenerationError(this.keyName, err));
 					return;
 				}
 
 				crypto.pbkdf2(passwordBuffer, saltBuffer, iterations, keyLength, algorithm, (err, buff) => {
 					if (err) {
-						callback(new KeyGenerationError(err));
+						callback(new KeyGenerationError(this.keyName, err));
 						return;
 					}
 
@@ -41,7 +42,7 @@ class KeyGenerator {
 						buff = this._cutBuffer(buff, keyLength);
 					}
 					else if (buff.length < keyLength) {
-						callback(new KeyLengthTooLargeError());
+						callback(new KeyLengthTooLargeError(this.keyName, this.keyLength));
 						return;
 					}
 

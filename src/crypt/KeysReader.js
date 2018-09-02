@@ -25,7 +25,7 @@ class KeysReader {
 			}
 
 			if (!keyMap) {
-				callback(new KeysFormatError(parseError));
+				callback(new KeysFormatError());
 				return;
 			}
 

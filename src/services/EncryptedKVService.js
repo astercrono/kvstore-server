@@ -6,7 +6,7 @@ const IVCipher = require("../crypt/IVCipher");
 const EncryptedKeyValue = require("../model/EncryptedKeyValue");
 const KVSignatureError = require("../error/KVSignatureError");
 const EncryptionError = require("../error/EncryptionError");
-const DencryptionError = require("../error/DecryptionError");
+const DecryptionError = require("../error/DecryptionError");
 
 class EncryptedKVService extends KVService {
 	constructor(kvdao) {
@@ -124,7 +124,7 @@ class EncryptedKVService extends KVService {
 	_encryptKeyValue(keyValue, callback) {
 		KVCrypt().encrypt(keyValue.value, (error, ivCipher) => {
 			if (error) {
-				callback(new EncryptionError(keyValue.key));
+				callback(new EncryptionError(keyValue.key, error));
 				return;
 			}
 
@@ -146,7 +146,7 @@ class EncryptedKVService extends KVService {
 
 		KVCrypt().decrypt(ivCipher, (error, plaintext) => {
 			if (error) {
-				callback(new DencryptionError(keyValue.key));
+				callback(new DecryptionError(keyValue.key, error));
 				return;
 			}
 			keyValue.value = plaintext;

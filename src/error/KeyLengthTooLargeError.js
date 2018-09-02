@@ -1,11 +1,9 @@
-function KeyLengthTooLargeError(cause) {
-	this.name = "KeyGenerationError";
-	this.message = "The requested key length is too large.";
+const ExtendableError = require("./ExtendableError");
 
-	if (cause) {
-		this.message += "\n" + cause.stack;
+class KeyLengthTooLargeError extends ExtendableError {
+	constructor(key, length, error) {
+		super("Key too large. Key=" + key, _+ ", Length=" + length, error);
 	}
 };
-KeyLengthTooLargeError.prototype = Object.create(Error);
 
 module.exports = exports = KeyLengthTooLargeError;

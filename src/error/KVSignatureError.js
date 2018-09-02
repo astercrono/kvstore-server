@@ -1,8 +1,8 @@
 const ExtendableError = require("./ExtendableError");
 
 class KVSignatureError extends ExtendableError {
-	constructor(key) {
-		super("Error confirming signature of value for key=" + key);
+	constructor(key, error) {
+		super("Error confirming signature of value for key=" + key, error);
 	}
 };
 

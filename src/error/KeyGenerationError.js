@@ -1,11 +1,9 @@
-function KeyGenerationError(cause) {
-	this.name = "KeyGenerationError";
-	this.message = "Error generating key.";
+const ExtendableError = require("./ExtendableError");
 
-	if (cause) {
-		this.message += "\n" + cause.stack;
+class KeyGenerationError extends ExtendableError {
+	constructor(name, error) {
+		super("Error generating key=" + name, error);
 	}
 };
-KeyGenerationError.prototype = Object.create(Error);
 
 module.exports = exports = KeyGenerationError;

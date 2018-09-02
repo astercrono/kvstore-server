@@ -70,7 +70,7 @@ class Config {
 	}
 
 	encryptionKeyOptions() {
-		const options = new KeyOptions();
+		const options = new KeyOptions("encryption");
 		options.iterations = this.encryptionKeyIterations();
 		options.keyLength = this.encryptionKeyLength();
 		options.algorithm = "sha256";
@@ -80,7 +80,7 @@ class Config {
 	}
 
 	encryptionIVOptions() {
-		const options = new KeyOptions();
+		const options = new KeyOptions("encryptionIV");
 		options.iterations = this.encryptionIVIterations();
 		options.keyLength = this.encryptionIVLength();
 		options.algorithm = "sha256";
@@ -90,7 +90,7 @@ class Config {
 	}
 
 	signingKeyOptions() {
-		const options = new KeyOptions();
+		const options = new KeyOptions("signing");
 		options.iterations = this.signingKeyIterations();
 		options.keyLength = this.signingKeyLength();
 		options.algorithm = "sha256";
@@ -100,7 +100,7 @@ class Config {
 	}
 
 	apiKeyOptions() {
-		const options = new KeyOptions();
+		const options = new KeyOptions("api");
 		options.iterations = this.apiKeyIterations();
 		options.keyLength = this.apiKeyLength();
 		options.algorithm = "sha256";

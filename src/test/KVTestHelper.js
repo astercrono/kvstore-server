@@ -1,10 +1,10 @@
 const assert = require("assert");
-const Config = require("../src/config/Config");
-const KeyStore = require("../src/crypt/KeyStore");
-const ComponentStore = require("../src/component/ComponentStore");
+const Config = require("../config/Config");
+const KeyStore = require("../crypt/KeyStore");
+const ComponentStore = require("../component/ComponentStore");
 
 module.exports = exports = {
-	initialize: (loadComponents) => {
+	initialize: () => {
 		return (done) => {
 			Config.load("test");
 			assert.ok(KeyStore);
@@ -17,9 +17,7 @@ module.exports = exports = {
 					assert.ok(!err);
 					assert.ok(keys);
 
-					if (loadComponents) {
-						ComponentStore.load();
-					}
+					ComponentStore.load();
 
 					done();
 				});

@@ -1,11 +1,9 @@
-function KeyStoreInitError(cause) {
-	this.name = "KeyStoreInitError";
-	this.message = "Error initializing Key Store.";
+const ExtendableError = require("./ExtendableError");
 
-	if (cause) {
-		this.message += "\n" + cause.stack;
+class KeyStoreInitError extends ExtendableError {
+	constructor(error) {
+		super("Error initializing Key Store.", error);
 	}
 }
-KeyStoreInitError.prototype = Object.create(Error);
 
 module.exports = exports = KeyStoreInitError;

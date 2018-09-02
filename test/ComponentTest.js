@@ -1,35 +1,22 @@
 const assert = require("assert");
-const KVTestHelper = require("./KVTestHelper");
-const ComponentLoader = require("../src/component/ComponentLoader");
+const KVTestHelper = require("../src/test/KVTestHelper");
 const Component = require("../src/component/Component");
 const ComponentStore = require("../src/component/ComponentStore");
 
-class TestLoader extends ComponentLoader {
-	load() {
-		const obj = {
-			foo: 1,
-			bar: () => { return 2; }
-		};
-		return [super.createComponent("TestComponent", obj)];
-	}
-}
-
 describe("Component Test", () => {
-	before(KVTestHelper.initialize(false));
+	before(KVTestHelper.initialize());
 
 	it("Loading Component Store", (done) => {
-		let loaders = require("../src/component/load");
-		loaders.push(TestLoader);
-
-		ComponentStore.load();
-
-		const component = ComponentStore.get("TestComponent");
+		const component = ComponentStore.get("KVDao");
 		assert.ok(component);
-		assert.equal(component.foo, 1);
-		assert.equal(component.bar(), 2);
+		assert.ok(component.getAll);
+		assert.ok(component.getValue);
+		assert.ok(component.putValue);
+		assert.ok(component.getKeys);
+		assert.ok(component.deleteValue);
 
 		try {
-			ComponentStore.add(new Component("TestComponent", {}));
+			ComponentStore.add(new Component("KVDao", {}));
 		}
 		catch(error) {
 			assert.ok(error);
