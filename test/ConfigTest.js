@@ -15,5 +15,6 @@ describe("Configurations", () => {
 		assert.ok(Config.encryptionIVOptions());
 		assert.ok(Config.signingKeyOptions());
 		assert.ok(Config.apiKeyOptions());
+		assert.equal(Config.httpPort(), 8080);
 	});
 });

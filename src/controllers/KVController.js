@@ -1,96 +1,110 @@
-const express = require("express");
-const router = express.Router();
+const ExpressRouter = require("./ExpressController");
 const bodyParser = require("body-parser");
 const AuthenticationInterceptor = require("./AuthenticationInterceptor");
+const KeyValue = require("../model/KeyValue");
 
 const ResponseSender = require("./ResponseSender");
-const KVService = require("../services/KVService2");
-
 const jsonParser = bodyParser.json();
-const authInterceptor = AuthenticationInterceptor();
 
-router.get("/all",  authInterceptor, (request, response) => {
-	KVService.getAll((err, rows) => {
-		ResponseSender.send(response, rows);
-	});
-});
+class KVController extends ExpressRouter {
+	constructor(service) {
+		super("kvstore", [AuthenticationInterceptor.createDefault(), bodyParser]);
+		this.service = service;
 
-router.get("/value/:key",  authInterceptor, (request, response) => {
-	if (!("key" in request.params)) {
-		ResponseSender.failParam(response);
-		return;
+		super.routeGet("/all", this.getAll);
+		super.routeGet("/value/:key", this.getValue);
+		super.routeGet("/keys", this.getKeys);
+		super.routePut("/value", this.putValue);
+		super.routeDelete("/value", this.deleteValue);
+		super.routeAll((request, response) => { new ResponseSender(response).failUnknownRoute(); });
 	}
 
-	const key = request.params.key;
+	getAll(request, response) {
+		const sender = new ResponseSender(response);
 
-	KVService.getValue(key, (err, keys) => {
-		if (err) {
-			ResponseSender.failInternalError(response);
-			return;
-		}
-		ResponseSender.send(response, keys);
-	});
-});
-
-router.get("/keys",  authInterceptor, (request, response) => {
-	KVService.getKeys((err, keys) => {
-		if (err) {
-			ResponseSender.failInternalError(response);
-			return;
-		}
-		ResponseSender.send(response, keys);
-	});
-});
-
-router.put("/value", [authInterceptor, jsonParser], (request, response) => {
-	const model = request.body;
-
-	if (!("key" in model) || !("value" in model)) {
-		ResponseSender.failParam(response);
+		this.service.getAll((error, keyValues) => {
+			if (error) {
+				sender.failInternalError();
+				return;
+			}
+			sender.send(keyValues);
+		});
 	}
 
-	const key = model.key;
-	const value = model.value;
+	getValue(request, response) {
+		const sender = new ResponseSender(response);
+		const key = request.params.key;
 
-	KVService.putValue(key, value, (err) => {
-		if (err) {
-			ResponseSender.failInternalError(response);
+		if (!this._hasRequestParam(request, "key")) {
+			sender.failParam();
 			return;
 		}
-		ResponseSender.send(response, {"key": key, "value": value});
-	});
-});
 
-router.delete("/value", [authInterceptor, jsonParser], (request, response) => {
-	const model = request.body;
-
-	if (!("key" in model)) {
-		ResponseSender.failParam(response);
+		this.service.getValue(key, (error, value) => {
+			if (error) {
+				sender.failInternalError();
+				return;
+			}
+			sender.send(value);
+		});
 	}
 
-	const key = model.key;
+	getKeys(request, response) {
+		const sender = new ResponseSender(response);
 
-	KVService.deleteValue(key, (err) => {
-		if (err) {
-			ResponseSender.failInternalError(response);
+		this.service.getKeys((error, keys) => {
+			if (error) {
+				sender.failInternalError();
+				return;
+			}
+			sender.send(keys);
+		});
+	}
+
+	putValue(request, response) {
+		const sender = new ResponseSender(response);
+
+		if (!this._hasRequestModelValues(request, ["key", "value"])) {
+			sender.failParam();
 			return;
 		}
-		ResponseSender.send(response);
-	});
-});
 
-router.post("/rebuild", [authInterceptor], (request, response) => {
-	KVService.rebuild((err) => {
-		if (err) {
-			ResponseSender.failInternalError(response);
+		const keyValue = new KeyValue(request.body.key, request.body.value);
+		this.service.putValue(keyValue, (error) => {
+			if (error) {
+				sender.failInternalError();
+				return;
+			}
+			sender.send();
+		});
+	}
+
+	deleteValue(request, response) {
+		const sender = new ResponseSender(response);
+
+		if (!this._hasRequestModelValues(request, ["key"])) {
+			sender.failParam();
 			return;
 		}
-		ResponseSender.send(response);
-	});
-});
 
-router.all("*", (request, response) => {
-	ResponseSender.failUnknownRoute(response);
-});
+		this.service.deleteValue(request.body.key, (error) => {
+			if (error) {
+				sender.failInternalError();
+				return;
+			}
+			sender.send();
+		});
+	}
 
-module.exports = exports = router;
+	_hasRequestParam(request, key) {
+		return "key" in request.params;
+	}
+
+	_hasRequestModelValues(request, keys) {
+		return keys.every((k) => {
+			return k in request.body;
+		});
+	}
+}
+
+module.exports = exports = KVController;

@@ -1,13 +1,12 @@
-const config = require("./config").get();
-const KVServer = require("./src/KVServer");
+let profile = "default";
 
-const server = KVServer(false);
-server.start((err, listener) => {
-	if (err) {
-		console.log("Server closing");
-		console.log(err);
-		server.close();
-		throw err;
-	}
-	console.log("Server listening on port " + config.server.port);
+if (process.argv.length === 3) {
+	profile = process.argv[2];
+}
+
+console.log("starting kvstore-server");
+
+const Initializer = require("./src/Initializer");
+Initializer.run(profile, () => {
+	console.log("kvstore-server is up and running");
 });

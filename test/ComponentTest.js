@@ -7,7 +7,7 @@ describe("Component Test", () => {
 	before(KVTestHelper.initialize());
 
 	it("Loading Component Store", (done) => {
-		const component = ComponentStore.get("KVDao");
+		const component = ComponentStore.getElement("KVDao");
 		assert.ok(component);
 		assert.ok(component.getAll);
 		assert.ok(component.getValue);
@@ -24,4 +24,6 @@ describe("Component Test", () => {
 
 		done();
 	});
+
+	after(KVTestHelper.teardown());
 });

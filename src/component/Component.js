@@ -4,8 +4,9 @@ class Component {
 		this.element = element;
 	}
 
-	lock() {
-		Object.freeze(this);
+	destroy(done) {
+		this.element = undefined;
+		done();
 	}
 }
 

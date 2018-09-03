@@ -8,4 +8,6 @@ describe("Key Store", () => {
 		KeyStore.confirm();
 		done();
 	});
+
+	after(KVTestHelper.teardown());
 });

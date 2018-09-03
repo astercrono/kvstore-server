@@ -1,4 +1,3 @@
-const async = require("async");
 const assert = require("assert");
 
 const Config = require("../config/Config");
@@ -122,46 +121,12 @@ class KeyStore {
 	_initNewKeys(path, callback) {
 		this.keys = new Keys();
 
-		async.parallel([
-			(asyncCallback) => {
-				this._initKey(Config.encryptionKeyOptions(), (err, key) => {
-					if (err) {
-						asyncCallback(err);
-						return;
-					}
-
-					this.keys.set("encryption", key);
-					asyncCallback();
-				});
-			},
-			(asyncCallback) => {
-				this._initKey(Config.signingKeyOptions(), (err, key) => {
-					if (err) {
-						asyncCallback(err);
-						return;
-					}
-
-					this.keys.set("signing", key);
-					asyncCallback();
-				});
-			},
-			(asyncCallback) => {
-				this._initKey(Config.apiKeyOptions(), (err, key) => {
-					if (err) {
-						asyncCallback(err);
-						return;
-					}
-
-					this.keys.set("api", key);
-					asyncCallback();
-				});
-			}
-		], (err) => {
-			if (err) {
-				callback(new KeyStoreInitError(err));
-				return;
-			}
-
+		let promises = [
+			this._createKeyPromise(Config.encryptionKeyOptions()).catch((error) => { callback(new KeyStoreInitError(error)); }),
+			this._createKeyPromise(Config.signingKeyOptions()).catch((error) => { callback(new KeyStoreInitError(error)); }),
+			this._createKeyPromise(Config.apiKeyOptions()).catch((error) => { callback(new KeyStoreInitError(error)); })
+		];
+		Promise.all(promises).then(() => {
 			if (path === MemoryPath) {
 				callback(undefined, this.keys);
 				return;
@@ -173,6 +138,19 @@ class KeyStore {
 					return;
 				}
 				callback(undefined, this.keys);
+			});
+		});
+	}
+
+	_createKeyPromise(keyOptions) {
+		return new Promise((resolve, reject) => {
+			this._initKey(keyOptions, (err, key) => {
+				if (err) {
+					return reject(err);
+				}
+
+				this.keys.set(keyOptions.name, key);
+				return resolve();
 			});
 		});
 	}

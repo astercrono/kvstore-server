@@ -5,5 +5,11 @@ module.exports = exports = {
 		return (done) => {
 			Initializer.run("test", done);
 		};
+	},
+
+	teardown: () => {
+		return (done) => {
+			Initializer.stop(done);
+		};
 	}
 };

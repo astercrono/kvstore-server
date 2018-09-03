@@ -16,7 +16,7 @@ describe("KVDao", () => {
 	before(KVTestHelper.initialize());
 
 	it("#getAll()", (done) => {
-		const dao = ComponentStore.get("KVDao");
+		const dao = ComponentStore.getElement("KVDao");
 		putTestValue(dao, () => {
 			dao.getAll((error, keyValues) => {
 				assert.ok(!error);
@@ -35,7 +35,7 @@ describe("KVDao", () => {
 	});
 
 	it("#getValue()", (done) => {
-		const dao = ComponentStore.get("KVDao");
+		const dao = ComponentStore.getElement("KVDao");
 		putTestValue(dao, () => {
 			dao.getValue("test", (error, keyValue) => {
 				assert.ok(!error);
@@ -49,14 +49,14 @@ describe("KVDao", () => {
 	});
 
 	it("#putValue()", (done) => {
-		const dao = ComponentStore.get("KVDao");
+		const dao = ComponentStore.getElement("KVDao");
 		putTestValue(dao, () => {
 			done();
 		});
 	});
 
 	it("#getKeys", (done) => {
-		const dao = ComponentStore.get("KVDao");
+		const dao = ComponentStore.getElement("KVDao");
 		putTestValue(dao, () => {
 			dao.getKeys((error, keys) => {
 				assert.ok(!error);
@@ -69,7 +69,7 @@ describe("KVDao", () => {
 	});
 
 	it("#deleteValue()", (done) => {
-		const dao = ComponentStore.get("KVDao");
+		const dao = ComponentStore.getElement("KVDao");
 		putTestValue(dao, () => {
 			dao.deleteValue("test", (error) => {
 				assert.ok(!error);
@@ -84,7 +84,7 @@ describe("KVDao", () => {
 	});
 
 	it("#run()", (done) => {
-		const dao = ComponentStore.get("KVDao");
+		const dao = ComponentStore.getElement("KVDao");
 		putTestValue(dao, () => {
 			dao.run("delete from kvstore where key = ?", ["test"], (error) => {
 				assert.ok(!error);
@@ -97,4 +97,6 @@ describe("KVDao", () => {
 			});
 		});
 	});
+
+	after(KVTestHelper.teardown());
 });

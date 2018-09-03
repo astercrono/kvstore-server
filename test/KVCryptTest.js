@@ -55,4 +55,6 @@ describe("KVCrypt", () => {
 
 		done();
 	});
+
+	after(KVTestHelper.teardown());
 });

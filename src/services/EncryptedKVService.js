@@ -1,5 +1,3 @@
-const async = require("async");
-
 const KVService = require("./KVService");
 const KVCrypt = require("../crypt/KVCrypt");
 const IVCipher = require("../crypt/IVCipher");
@@ -98,25 +96,21 @@ class EncryptedKVService extends KVService {
 	}
 
 	_decryptKeyValues(keyValues, callback) {
-		let asyncDecryptions = [];
+		let promises = [];
 
 		keyValues.forEach((kv) => {
-			asyncDecryptions.push((cb) => {
+			promises.push(new Promise((resolve, reject) => {
 				this._decryptKeyValue(kv, (error) => {
 					if (error) {
-						cb(error);
+						reject(error);
 						return;
 					}
-					cb();
+					resolve();
 				});
-			});
+			}).catch((error) => { callback(error); }));
 		});
 
-		async.parallel(asyncDecryptions, (error) => {
-			if (error) {
-				callback(error);
-				return;
-			}
+		Promise.all(promises).then(() => {
 			callback();
 		});
 	}

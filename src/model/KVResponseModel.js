@@ -1,18 +1,8 @@
-function KVResponseModel(data, message) {
-	const model = {
-		"data": null,
-		"message": null 
-	};
-
-	if (data) {
-		model.data = data;
+class KVResponseModel {
+	constructor(data, message) {
+		this.data = data;
+		this.message = message;
 	}
-
-	if (message) {
-		model.message = message;
-	}
-
-	return model;
 }
 
 module.exports = exports = KVResponseModel;

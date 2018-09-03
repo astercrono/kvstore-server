@@ -19,6 +19,10 @@ class Config {
 		this.name = undefined;
 	}
 
+	httpPort() {
+		return this.configModel.httpPort;
+	}
+
 	encryptionKeyLength() {
 		return encryptionKeyLength;
 	}

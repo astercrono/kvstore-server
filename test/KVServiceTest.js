@@ -15,7 +15,7 @@ describe("KVService", () => {
 	before(KVTestHelper.initialize());
 
 	it("#getAll()", (done) => {
-		const service = ComponentStore.get("KVService");
+		const service = ComponentStore.getElement("KVService");
 		putTestValue(service, () => {
 			service.getAll((error, keyValues) => {
 				assert.ok(!error);
@@ -33,7 +33,7 @@ describe("KVService", () => {
 	});
 
 	it("#getValue()", (done) => {
-		const service = ComponentStore.get("KVService");
+		const service = ComponentStore.getElement("KVService");
 		putTestValue(service, () => {
 			service.getValue("test", (error, value) => {
 				assert.ok(!error);
@@ -45,14 +45,14 @@ describe("KVService", () => {
 	});
 
 	it("#putValue()", (done) => {
-		const service = ComponentStore.get("KVService");
+		const service = ComponentStore.getElement("KVService");
 		putTestValue(service, () => {
 			done();
 		});
 	});
 
 	it("#getKeys", (done) => {
-		const service = ComponentStore.get("KVService");
+		const service = ComponentStore.getElement("KVService");
 		putTestValue(service, () => {
 			service.getKeys((error, keys) => {
 				assert.ok(!error);
@@ -65,7 +65,7 @@ describe("KVService", () => {
 	});
 
 	it("#deleteValue()", (done) => {
-		const service = ComponentStore.get("KVService");
+		const service = ComponentStore.getElement("KVService");
 		putTestValue(service, () => {
 			service.deleteValue("test", (error) => {
 				assert.ok(!error);
@@ -78,5 +78,7 @@ describe("KVService", () => {
 			});
 		});
 	});
+
+	after(KVTestHelper.teardown());
 });
 
