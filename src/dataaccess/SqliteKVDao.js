@@ -42,7 +42,7 @@ class SqliteKVDao extends KVDao {
 				return;
 			}
 
-			callback(undefined, new KeyValue(row.value));
+			callback(undefined, row.value);
 		});
 	}
 
@@ -81,7 +81,6 @@ class SqliteKVDao extends KVDao {
 			callback();
 		});
 	}
-
 
 	run(sql, params, callback) {
 		this.db.run(sql, params, (err) => {

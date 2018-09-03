@@ -34,8 +34,65 @@ describe("KVDao", () => {
 		});
 	});
 
-	/*it("#putValue()", () => {
+	it("#getValue()", (done) => {
 		const dao = ComponentStore.get("KVDao");
-		before(putTestValue(dao));
-	});*/
+		putTestValue(dao, () => {
+			dao.getValue("test", (error, value) => {
+				assert.ok(!error);
+				assert.ok(value);
+				assert.equal(value, "This is a test value.");
+				done();
+			});
+		});
+	});
+
+	it("#putValue()", (done) => {
+		const dao = ComponentStore.get("KVDao");
+		putTestValue(dao, () => {
+			done();
+		});
+	});
+
+	it("#getKeys", (done) => {
+		const dao = ComponentStore.get("KVDao");
+		putTestValue(dao, () => {
+			dao.getKeys((error, keys) => {
+				assert.ok(!error);
+				assert.ok(keys);
+				assert.equal(keys.length, 1);
+				assert.equal("test", keys[0]);
+				done();
+			});
+		});
+	});
+
+	it("#deleteValue()", (done) => {
+		const dao = ComponentStore.get("KVDao");
+		putTestValue(dao, () => {
+			dao.deleteValue("test", (error) => {
+				assert.ok(!error);
+
+				dao.getValue("test", (error, value) => {
+					assert.ok(!error);
+					assert.ok(!value);
+					done();
+				});
+			});
+		});
+	});
+
+	it("#run()", (done) => {
+		const dao = ComponentStore.get("KVDao");
+		putTestValue(dao, () => {
+			dao.run("delete from kvstore where key = ?", ["test"], (error) => {
+				assert.ok(!error);
+
+				dao.getValue("test", (error, value) => {
+					assert.ok(!error);
+					assert.ok(!value);
+					done();
+				});
+			});
+		});
+	});
 });
