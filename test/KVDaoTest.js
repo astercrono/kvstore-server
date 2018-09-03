@@ -37,10 +37,12 @@ describe("KVDao", () => {
 	it("#getValue()", (done) => {
 		const dao = ComponentStore.get("KVDao");
 		putTestValue(dao, () => {
-			dao.getValue("test", (error, value) => {
+			dao.getValue("test", (error, keyValue) => {
 				assert.ok(!error);
-				assert.ok(value);
-				assert.equal(value, "This is a test value.");
+				assert.ok(keyValue);
+				assert.equal(keyValue.key, "test");
+				assert.equal(keyValue.value, "This is a test value.");
+				assert.equal(keyValue.signature, "This is a test signature.");
 				done();
 			});
 		});

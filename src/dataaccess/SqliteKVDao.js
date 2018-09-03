@@ -4,7 +4,7 @@ const KVDao = require("./KVDao");
 const KeyValue = require("../model/KeyValue");
 
 const getAllSql = "select key, value, signature from kvstore order by key ";
-const getValueSql = "select value from kvstore where key = ?";
+const getValueSql = "select key, value, signature from kvstore where key = ?";
 const putValueSql = "insert or replace into kvstore (key, value, signature) values (?, ?, ?)";
 const getKeysSql = "select key from kvstore order by key ";
 const deleteValueSql = "delete from kvstore where key = ?";
@@ -42,7 +42,7 @@ class SqliteKVDao extends KVDao {
 				return;
 			}
 
-			callback(undefined, row.value);
+			callback(undefined, new KeyValue(row.key, row.value, row.signature));
 		});
 	}
 

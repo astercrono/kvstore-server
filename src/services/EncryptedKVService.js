@@ -25,6 +25,13 @@ class EncryptedKVService extends KVService {
 					callback(error);
 					return;
 				}
+
+				if (keyValues.length > 0) {
+					keyValues.forEach((kv) => {
+						kv.signature = undefined;
+					});
+				}
+
 				callback(undefined, keyValues);
 			});
 		});
@@ -47,7 +54,8 @@ class EncryptedKVService extends KVService {
 					callback(error);
 					return;
 				}
-				callback(undefined, keyValue);
+
+				callback(undefined, keyValue.value);
 			});
 		});
 	}
@@ -75,22 +83,14 @@ class EncryptedKVService extends KVService {
 	}
 
 	deleteValue(key, callback) {
-		this.getValue(key, (error, keyValue) => {
+		this.getValue(key, (error, value) => {
 			if (error) {
 				callback(error);
 				return;
 			}
 
-			if (!keyValue) {
+			if (!value) {
 				callback();
-			}
-
-			const ivCipher = IVCipher.decode(keyValue.value);
-			const ekv = new EncryptedKeyValue(keyValue.key, ivCipher, keyValue.signature);
-
-			if (!this._confirmKeyValueSignature(ekv)) {
-				callback(new KVSignatureError(ekv.key));
-				return;
 			}
 
 			this.dao.deleteValue(key, callback);
@@ -155,8 +155,9 @@ class EncryptedKVService extends KVService {
 	}
 
 	_confirmKeyValueSignature(encryptedKeyValue) {
-		const expected = KVCrypt().signKeyValue(ekv);
-		return KVCrypt().confirmSignature(encryptedKeyValue.signature, expected);
+		const expected = KVCrypt().signKeyValue(encryptedKeyValue);
+		const actual = encryptedKeyValue.signature;
+		return expected === actual;
 	}
 }
 

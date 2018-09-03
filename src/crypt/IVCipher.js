@@ -13,7 +13,7 @@ class IVCipher {
 	static decode(encodedString) {
 		const index = encodedString.indexOf(ivKeyDelimiter);
 		const iv = encodedString.substring(0, index);
-		const cipherText = encodedString.substring(index + 1, encodedString.length);
+		const cipherText = encodedString.substring(index + 4, encodedString.length);
 		return new IVCipher(cipherText, iv);
 	}
 }

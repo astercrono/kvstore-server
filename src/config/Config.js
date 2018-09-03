@@ -6,7 +6,7 @@ const configPath = path.join(__dirname, "/../../config.json");
 const encryptionKeyLength = 16;
 const encryptionKeyIterations = 1000000;
 const encryptionIVLength = 16;
-const encryptionIVIterations = 1000000;
+const encryptionIVIterations = 500000;
 const signingKeyLength = 32;
 const signingKeyIterations = 1000000;
 const apiKeyLength = 32;
@@ -26,7 +26,6 @@ class Config {
 	encryptionIVLength() {
 		return encryptionIVLength;
 	}
-
 
 	signingKeyLength() {
 		return signingKeyLength;

@@ -4,7 +4,7 @@ const EncryptedKVService = require("../../services/EncryptedKVService");
 
 class ServiceLoader extends ComponentLoader {
 	load() {
-		const dao = ComponentStore.add("KVDao");
+		const dao = ComponentStore.get("KVDao");
 		const service = new EncryptedKVService(dao);
 		return super.createComponent("KVService", service);
 	}
