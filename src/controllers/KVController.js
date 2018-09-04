@@ -4,96 +4,112 @@ const AuthenticationInterceptor = require("./AuthenticationInterceptor");
 const KeyValue = require("../model/KeyValue");
 
 const ResponseSender = require("./ResponseSender");
-const jsonParser = bodyParser.json();
 
 class KVController extends ExpressRouter {
 	constructor(service) {
-		super("kvstore", [AuthenticationInterceptor.createDefault(), bodyParser]);
+		super("/kvstore", [AuthenticationInterceptor.createDefault(), bodyParser.json()]);
 		this.service = service;
 
-		super.routeGet("/all", this.getAll);
-		super.routeGet("/value/:key", this.getValue);
-		super.routeGet("/keys", this.getKeys);
-		super.routePut("/value", this.putValue);
-		super.routeDelete("/value", this.deleteValue);
-		super.routeAll((request, response) => { new ResponseSender(response).failUnknownRoute(); });
-	}
-
-	getAll(request, response) {
-		const sender = new ResponseSender(response);
-
-		this.service.getAll((error, keyValues) => {
-			if (error) {
-				sender.failInternalError();
-				return;
-			}
-			sender.send(keyValues);
+		super.routeGet("/all", this.getAll());
+		super.routeGet("/value/:key", this.getValue());
+		super.routeGet("/keys", this.getKeys());
+		super.routePut("/value", this.putValue());
+		super.routeDelete("/value", this.deleteValue());
+		super.routeAll((request, response) => {
+			new ResponseSender(response).failUnknownRoute();
 		});
 	}
 
-	getValue(request, response) {
-		const sender = new ResponseSender(response);
-		const key = request.params.key;
+	getAll() {
+		const service = this.service;
+		return (request, response) => {
+			const sender = new ResponseSender(response);
 
-		if (!this._hasRequestParam(request, "key")) {
-			sender.failParam();
-			return;
-		}
-
-		this.service.getValue(key, (error, value) => {
-			if (error) {
-				sender.failInternalError();
-				return;
-			}
-			sender.send(value);
-		});
+			service.getAll((error, keyValues) => {
+				if (error) {
+					sender.failInternalError();
+					return;
+				}
+				sender.send(keyValues);
+			});
+		};
 	}
 
-	getKeys(request, response) {
-		const sender = new ResponseSender(response);
+	getValue() {
+		const service = this.service;
+		return (request, response) => {
+			const sender = new ResponseSender(response);
+			const key = request.params.key;
 
-		this.service.getKeys((error, keys) => {
-			if (error) {
-				sender.failInternalError();
+			if (!this._hasRequestParam(request, "key")) {
+				sender.failParam();
 				return;
 			}
-			sender.send(keys);
-		});
+
+			service.getValue(key, (error, value) => {
+				if (error) {
+					sender.failInternalError();
+					return;
+				}
+				sender.send(value);
+			});
+		};
 	}
 
-	putValue(request, response) {
-		const sender = new ResponseSender(response);
+	getKeys() {
+		const service = this.service;
+		return (request, response) => {
+			const sender = new ResponseSender(response);
 
-		if (!this._hasRequestModelValues(request, ["key", "value"])) {
-			sender.failParam();
-			return;
-		}
-
-		const keyValue = new KeyValue(request.body.key, request.body.value);
-		this.service.putValue(keyValue, (error) => {
-			if (error) {
-				sender.failInternalError();
-				return;
-			}
-			sender.send();
-		});
+			service.getKeys((error, keys) => {
+				if (error) {
+					sender.failInternalError();
+					return;
+				}
+				sender.send(keys);
+			});
+		};
 	}
 
-	deleteValue(request, response) {
-		const sender = new ResponseSender(response);
+	putValue() {
+		const service = this.service;
+		return (request, response) => {
+			const sender = new ResponseSender(response);
 
-		if (!this._hasRequestModelValues(request, ["key"])) {
-			sender.failParam();
-			return;
-		}
-
-		this.service.deleteValue(request.body.key, (error) => {
-			if (error) {
-				sender.failInternalError();
+			if (!this._hasRequestModelValues(request, ["key", "value"])) {
+				sender.failParam();
 				return;
 			}
-			sender.send();
-		});
+
+			const keyValue = new KeyValue(request.body.key, request.body.value);
+			service.putValue(keyValue, (error) => {
+				if (error) {
+					sender.failInternalError();
+					return;
+				}
+				sender.send();
+			});
+		};
+	}
+
+	deleteValue() {
+		const service = this.service;
+		return (request, response) => {
+			const sender = new ResponseSender(response);
+
+			if (!this._hasRequestModelValues(request, ["key"])) {
+				sender.failParam();
+				return;
+			}
+
+			service.deleteValue(request.body.key, (error) => {
+				if (error) {
+					sender.failInternalError();
+					return;
+				}
+				sender.send();
+			});
+		};
 	}
 
 	_hasRequestParam(request, key) {

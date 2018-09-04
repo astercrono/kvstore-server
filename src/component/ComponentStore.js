@@ -13,8 +13,8 @@ class ComponentStore {
 
 		const loaders = require("./load");
 		loaders.forEach((L) => {
-			const loader = new L();
-			const componentModel = loader.load();
+			let loader = new L();
+			let componentModel = loader.load();
 
 			if (Array.isArray(componentModel)) {
 				componentModel.forEach((c) => {
@@ -90,7 +90,7 @@ class ComponentStore {
 
 	add(component) {
 		if (this._data[component.name]) {
-			throw new ComponentAlreadyExistsError(component.name);
+			throw new ComponentAlreadyExistsError(component.name); // getting error?
 		}
 		this._data[component.name] = component;
 	}
