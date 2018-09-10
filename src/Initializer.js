@@ -40,7 +40,6 @@ class Initializer {
 	}
 
 	_startExpressServer(done) {
-		// TODO - create loader for controller
 		const app = express();
 		ComponentStore.add(new Component("ExpressApp", app));
 
