@@ -1,6 +1,6 @@
 const ComponentLoader = require("../../ComponentLoader");
 const ComponentStore = require("../../ComponentStore");
-const KVController = require("../../../controllers/KVController")
+const KVController = require("../../../controllers/KVController");
 const KVControllerComponent = require("./KVControllerComponent");
 
 class ControllerLoader extends ComponentLoader {

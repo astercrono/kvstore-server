@@ -2,7 +2,7 @@
 	"default": {
 		"databasePath": "${homeDirectory}/kvstore.db",
 		"secretPath": "${homeDirectory}/kvstore.secret",
-		"httpPort": 8080
+		"httpPort": 2302
 	},
 	"test": {
 		"databasePath": ":memory:",
