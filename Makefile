@@ -35,4 +35,4 @@ keys: build
 	@node $(key_script) $(profile)
 
 test: build
-	@mocha
+	@mocha -t 60000
