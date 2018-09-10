@@ -75,8 +75,14 @@ class KeyStore {
 		}
 
 		new KeysReader(this.path).read((err, readKeys) => {
-			if (!err && readKeys) {
+			if (err) {
 				callback(new KeysInitializedError(err));
+				return;
+			}
+
+			if (readKeys) {
+				this.keys = readKeys;
+				callback(undefined, this.keys);
 				return;
 			}
 
