@@ -6,7 +6,8 @@
 	},
 	"test": {
 		"databasePath": ":memory:",
-		"secretPath": ":memory:"
+		"secretPath": ":memory:",
+		"httpPort": 8081
 	},
 	"production": {
 		"databasePath": "${homeDirectory}/data/kvstore.db",
